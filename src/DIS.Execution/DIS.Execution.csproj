@@ -6,15 +6,12 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DIS.Execution</RootNamespace>
     <AssemblyName>DIS.Execution</AssemblyName>
-    <Description>Broker execution gateway. Contains the IExecutionAdapter interface and concrete adapters (MT5 via ZeroMQ/NetMQ). Responsible for order submission, fill reporting, and position state synchronisation. The MT5 adapter communicates with an EA via ZeroMQ PUSH/PULL for execution and REQ/REP for historical data.</Description>
+    <Description>MT5 TCP bridge adapter. Connects as a TCP client to the DIS.mq5 EA (which runs as a TCP server). Handles market data ingestion (HIST/BATCH) and order execution (ORDER/CLOSE/FILL) over a single persistent TCP connection.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <!--
-      NetMQ: ZeroMQ binding for .NET (C# side of MT5 bridge).
-      Verify broker DLL restriction policy before referencing libzmq.dll in the MT5 EA side.
-    -->
-    <PackageReference Include="NetMQ" Version="4.0.1.13" />
+    <!-- No ZeroMQ — EA uses raw TCP sockets via tclib.mqh -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
