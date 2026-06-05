@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DIS.DataFeed</RootNamespace>
+    <AssemblyName>DIS.DataFeed</AssemblyName>
+    <Description>Broker-agnostic market data abstraction layer. Provides tick, OHLC, order book, and trade print feeds via a unified interface. MT5 and other adapters are implemented in DIS.Execution.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DIS.Core\DIS.Core.csproj" />
+  </ItemGroup>
+
+</Project>

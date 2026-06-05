@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DIS.OutputLayer</RootNamespace>
+    <AssemblyName>DIS.OutputLayer</AssemblyName>
+    <Description>All 13 output evaluators. Each evaluator consumes a defined set of state values and applies the output rule book to produce a typed output value.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DIS.Core\DIS.Core.csproj" />
+    <ProjectReference Include="..\DIS.StateEngine\DIS.StateEngine.csproj" />
+  </ItemGroup>
+
+</Project>

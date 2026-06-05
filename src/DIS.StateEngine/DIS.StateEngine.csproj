@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DIS.StateEngine</RootNamespace>
+    <AssemblyName>DIS.StateEngine</AssemblyName>
+    <Description>All 34 state calculators. Each calculator is an independent unit that consumes market data and derived inputs, and emits a typed state value.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DIS.Core\DIS.Core.csproj" />
+    <ProjectReference Include="..\DIS.DataFeed\DIS.DataFeed.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DIS.TradeControl</RootNamespace>
+    <AssemblyName>DIS.TradeControl</AssemblyName>
+    <Description>Trade control, asset mapping, and cycle management. Enforces one-trade-per-asset and one-trade-per-strategy-per-cycle rules. Manages the 4-group asset registry (Trend, Breakout, Range, Reversal) with rank-based slot allocation. Derives and tracks the global Cycle ID.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DIS.Core\DIS.Core.csproj" />
+    <ProjectReference Include="..\DIS.Orchestration\DIS.Orchestration.csproj" />
+    <ProjectReference Include="..\DIS.EntryEngine\DIS.EntryEngine.csproj" />
+  </ItemGroup>
+
+</Project>

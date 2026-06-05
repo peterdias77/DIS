@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DIS.EntryEngine</RootNamespace>
+    <AssemblyName>DIS.EntryEngine</AssemblyName>
+    <Description>Entry signal generation. Evaluates orchestration decisions against the global block gate and produces typed entry signals (BUY, SELL, BUY_STOP, SELL_STOP, BUY_LIMIT, SELL_LIMIT, NO_ENTRY) with structure-based price levels and asset-class buffers.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DIS.Core\DIS.Core.csproj" />
+    <ProjectReference Include="..\DIS.Orchestration\DIS.Orchestration.csproj" />
+    <ProjectReference Include="..\DIS.StateEngine\DIS.StateEngine.csproj" />
+  </ItemGroup>
+
+</Project>

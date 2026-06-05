@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DIS.Logger</RootNamespace>
+    <AssemblyName>DIS.Logger</AssemblyName>
+    <Description>Event-driven structured logging for all 34 state changes, 13 output changes, 5 orchestration components, entry decisions, trade control events, risk calculations, executions, and exits. Emits structured JSON logs with before/after values, asset context, and cycle ID.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DIS.Core\DIS.Core.csproj" />
+  </ItemGroup>
+
+</Project>

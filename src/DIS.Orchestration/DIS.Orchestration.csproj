@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DIS.Orchestration</RootNamespace>
+    <AssemblyName>DIS.Orchestration</AssemblyName>
+    <Description>Five orchestration groups: Group 1 (Portfolio Permission), Group 2 (Safety/Risk Control), Group 3 (Market Type/Strategy), Group 4 (Direction), Group 5 (Quality/Confidence). Consumes output layer values and produces orchestration decisions.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DIS.Core\DIS.Core.csproj" />
+    <ProjectReference Include="..\DIS.OutputLayer\DIS.OutputLayer.csproj" />
+  </ItemGroup>
+
+</Project>

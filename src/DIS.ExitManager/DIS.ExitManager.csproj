@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DIS.ExitManager</RootNamespace>
+    <AssemblyName>DIS.ExitManager</AssemblyName>
+    <Description>Take profit calculation and dynamic exit ladder management. Implements the fixed 1:4 RR take profit, step-by-step position reduction (FULL → HALF → QUARTER → MINIMAL → CLOSED), and state-driven exit triggers.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DIS.Core\DIS.Core.csproj" />
+    <ProjectReference Include="..\DIS.Orchestration\DIS.Orchestration.csproj" />
+    <ProjectReference Include="..\DIS.RiskManager\DIS.RiskManager.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>DIS.RiskManager</RootNamespace>
+    <AssemblyName>DIS.RiskManager</AssemblyName>
+    <Description>Position sizing, stop loss calculation, and exposure control. Implements the entry size ladder (FULL/HALF/QUARTER/NO_TRADE), risk percent mapping, structure-based SL with volatility-adjusted buffers, minimum SL distance floors, and the final position size formula.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DIS.Core\DIS.Core.csproj" />
+    <ProjectReference Include="..\DIS.Orchestration\DIS.Orchestration.csproj" />
+    <ProjectReference Include="..\DIS.StateEngine\DIS.StateEngine.csproj" />
+  </ItemGroup>
+
+</Project>
