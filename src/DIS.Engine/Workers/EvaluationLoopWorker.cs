@@ -3,7 +3,7 @@ using DIS.Core.Models;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace DIS.Host.Workers;
+namespace DIS.Engine.Workers;
 
 /// <summary>
 /// Main runtime worker. Drives the per-asset evaluation loop:

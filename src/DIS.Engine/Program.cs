@@ -1,7 +1,7 @@
 using DIS.Core.Interfaces;
 using DIS.Execution.Adapters;
 using DIS.Logger;
-using DIS.Host.Workers;
+using DIS.Engine.Workers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;

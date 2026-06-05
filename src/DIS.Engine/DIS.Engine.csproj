@@ -4,8 +4,8 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <RootNamespace>DIS.Host</RootNamespace>
-    <AssemblyName>DIS.Host</AssemblyName>
+    <RootNamespace>DIS.Engine</RootNamespace>
+    <AssemblyName>DIS.Engine</AssemblyName>
     <Description>Main runtime host. A .NET Worker Service that bootstraps all DIS components, runs the evaluation loop, wires the data feed into the state engine, drives orchestration, and dispatches execution commands. The single executable entry point for the live system.</Description>
   </PropertyGroup>
 

@@ -24,7 +24,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DIS.Logger", "src\DIS.Logge
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DIS.Execution", "src\DIS.Execution\DIS.Execution.csproj", "{A100000B-0000-0000-0000-00000000000B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DIS.Host", "src\DIS.Host\DIS.Host.csproj", "{A100000C-0000-0000-0000-00000000000C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DIS.Engine", "src\DIS.Engine\DIS.Engine.csproj", "{A100000C-0000-0000-0000-00000000000C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DIS.Dashboard", "src\DIS.Dashboard\DIS.Dashboard.csproj", "{A100000D-0000-0000-0000-00000000000D}"
 EndProject
