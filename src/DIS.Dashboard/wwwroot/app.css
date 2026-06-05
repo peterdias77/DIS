@@ -1,0 +1,228 @@
+/* ── Reset ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: #0d0d0d;
+    color: #e0e0e0;
+    font-size: 14px;
+}
+
+/* ── Layout ────────────────────────────────────────── */
+.dis-layout {
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.dis-main {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 32px;
+}
+
+/* ── Nav ────────────────────────────────────────────── */
+.dis-nav {
+    width: 220px;
+    min-width: 220px;
+    background: #141414;
+    border-right: 1px solid #2a2a2a;
+    display: flex;
+    flex-direction: column;
+    padding: 20px 0;
+}
+
+.dis-nav-header {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.dis-logo {
+    font-size: 22px;
+    font-weight: 700;
+    color: #00d4aa;
+    display: block;
+}
+
+.dis-version {
+    font-size: 10px;
+    color: #555;
+    display: block;
+    margin-top: 2px;
+}
+
+.dis-connection {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    font-size: 12px;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.dis-connection-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #555;
+}
+
+.dis-connection.connected     .dis-connection-dot { background: #00d4aa; }
+.dis-connection.reconnecting  .dis-connection-dot { background: #f5a623; }
+.dis-connection.disconnected  .dis-connection-dot { background: #e74c3c; }
+
+.dis-nav-links {
+    list-style: none;
+    padding: 12px 0;
+}
+
+.dis-nav-links a {
+    display: block;
+    padding: 10px 20px;
+    color: #888;
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s;
+}
+
+.dis-nav-links a:hover,
+.dis-nav-links a.active {
+    color: #00d4aa;
+    background: #1a1a1a;
+}
+
+/* ── Typography ─────────────────────────────────────── */
+h1 { font-size: 20px; font-weight: 600; margin-bottom: 20px; color: #fff; }
+h2 { font-size: 16px; font-weight: 600; margin: 24px 0 12px; color: #ccc; }
+h3 { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: #aaa; }
+
+/* ── Cards ──────────────────────────────────────────── */
+.dis-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 28px;
+}
+
+.dis-card {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dis-card label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 0.05em; }
+.dis-card span  { font-size: 22px; font-weight: 700; color: #00d4aa; }
+
+/* ── Table ──────────────────────────────────────────── */
+.dis-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+
+.dis-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: #1a1a1a;
+    color: #555;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.dis-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #1e1e1e;
+    color: #ccc;
+}
+
+.dis-table tr:hover td { background: #161616; }
+.dis-table tr.warning td { color: #f5a623; }
+.dis-table tr.error   td { color: #e74c3c; }
+
+/* ── State grid ─────────────────────────────────────── */
+.dis-asset-panel {
+    background: #141414;
+    border: 1px solid #2a2a2a;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.dis-state-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.dis-state-chip {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    border-radius: 6px;
+    padding: 6px 10px;
+    min-width: 160px;
+}
+
+.dis-state-chip label { display: block; font-size: 10px; color: #555; margin-bottom: 2px; }
+.dis-state-chip span  { font-size: 12px; font-weight: 600; color: #00d4aa; }
+
+/* ── Log feed ───────────────────────────────────────── */
+.dis-log-feed {
+    font-family: 'Cascadia Code', 'Consolas', monospace;
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.dis-log-row {
+    display: flex;
+    gap: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    align-items: baseline;
+}
+
+.dis-log-row:hover          { background: #161616; }
+.dis-log-row.warning        { color: #f5a623; }
+.dis-log-row.error          { color: #e74c3c; }
+
+.dis-log-time    { color: #555; min-width: 90px; }
+.dis-log-asset   { color: #00d4aa; min-width: 80px; font-weight: 600; }
+.dis-log-cycle   { color: #555; min-width: 40px; }
+.dis-log-type    { color: #888; min-width: 140px; }
+.dis-log-payload { color: #ccc; word-break: break-all; }
+
+/* ── Filter bar ─────────────────────────────────────── */
+.dis-filter-bar {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.dis-filter-bar label { display: flex; gap: 8px; align-items: center; color: #888; font-size: 13px; }
+
+.dis-filter-bar select,
+.dis-filter-bar button {
+    background: #1a1a1a;
+    border: 1px solid #2a2a2a;
+    color: #ccc;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.dis-filter-bar button:hover { border-color: #00d4aa; color: #00d4aa; }
+
+/* ── Misc ───────────────────────────────────────────── */
+.dis-empty  { color: #555; padding: 24px 0; }
+.dis-payload { font-family: monospace; font-size: 11px; }
+td.buy      { color: #00d4aa; }
+td.sell     { color: #e74c3c; }

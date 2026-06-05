@@ -1,0 +1,75 @@
+@page "/"
+@using DIS.Core.Models
+@using DIS.Dashboard.Services
+@inject ILogReader LogReader
+@inject DashboardHubClient HubClient
+@implements IDisposable
+
+<h1>System Overview</h1>
+
+<div class="dis-summary-grid">
+    <div class="dis-card">
+        <label>Total Events</label>
+        <span>@_entries.Count</span>
+    </div>
+    <div class="dis-card">
+        <label>Active Assets</label>
+        <span>@_entries.Select(e => e.Asset).Distinct().Count()</span>
+    </div>
+    <div class="dis-card">
+        <label>Last Event</label>
+        <span>@(_entries.FirstOrDefault()?.Timestamp.ToString("HH:mm:ss") ?? "—")</span>
+    </div>
+    <div class="dis-card">
+        <label>Current Cycle</label>
+        <span>@(_entries.FirstOrDefault()?.CycleId.ToString() ?? "—")</span>
+    </div>
+</div>
+
+<h2>Recent Events</h2>
+<table class="dis-table">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Asset</th>
+            <th>Cycle</th>
+            <th>Event</th>
+            <th>Level</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var e in _entries.Take(50))
+        {
+            <tr class="@e.LogLevel.ToLower()">
+                <td>@e.Timestamp.ToString("HH:mm:ss.fff")</td>
+                <td>@e.Asset</td>
+                <td>@e.CycleId</td>
+                <td>@e.EventType</td>
+                <td>@e.LogLevel</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<DISLogEntry> _entries = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var history = await LogReader.GetRecentAsync(200);
+        _entries = history.ToList();
+        HubClient.OnLogEntry += OnLiveEntry;
+    }
+
+    private void OnLiveEntry(DISLogEntry entry)
+    {
+        InvokeAsync(() =>
+        {
+            _entries.Insert(0, entry);
+            if (_entries.Count > 500) _entries.RemoveAt(_entries.Count - 1);
+            StateHasChanged();
+        });
+    }
+
+    public void Dispose() => HubClient.OnLogEntry -= OnLiveEntry;
+}

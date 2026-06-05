@@ -1,0 +1,49 @@
+@using DIS.Dashboard.Services
+@using Microsoft.AspNetCore.SignalR.Client
+@inject DashboardHubClient HubClient
+@implements IDisposable
+
+<nav class="dis-nav">
+    <div class="dis-nav-header">
+        <span class="dis-logo">DIS</span>
+        <span class="dis-version">Decision Intelligence System</span>
+    </div>
+
+    <div class="dis-connection @ConnectionClass">
+        <span class="dis-connection-dot"></span>
+        <span>@ConnectionLabel</span>
+    </div>
+
+    <ul class="dis-nav-links">
+        <li><NavLink href="/"          Match="NavLinkMatch.All">Overview</NavLink></li>
+        <li><NavLink href="/states">States</NavLink></li>
+        <li><NavLink href="/trades">Active Trades</NavLink></li>
+        <li><NavLink href="/log">Log Feed</NavLink></li>
+    </ul>
+</nav>
+
+@code {
+    private System.Threading.Timer? _timer;
+
+    private string ConnectionClass => HubClient.ConnectionState switch
+    {
+        HubConnectionState.Connected    => "connected",
+        HubConnectionState.Reconnecting => "reconnecting",
+        _                               => "disconnected"
+    };
+
+    private string ConnectionLabel => HubClient.ConnectionState switch
+    {
+        HubConnectionState.Connected    => "Engine Connected",
+        HubConnectionState.Reconnecting => "Reconnecting...",
+        _                               => "Disconnected"
+    };
+
+    protected override void OnInitialized()
+    {
+        // Refresh connection indicator every 2 seconds
+        _timer = new System.Threading.Timer(_ => InvokeAsync(StateHasChanged), null, 0, 2_000);
+    }
+
+    public void Dispose() => _timer?.Dispose();
+}

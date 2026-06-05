@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DIS.Engine</RootNamespace>
     <AssemblyName>DIS.Engine</AssemblyName>
-    <Description>Main runtime host. A .NET Worker Service that bootstraps all DIS components, runs the evaluation loop, wires the data feed into the state engine, drives orchestration, and dispatches execution commands. The single executable entry point for the live system.</Description>
+    <Description>Main DIS runtime. Runs the evaluation loop as a Worker Service and hosts a SignalR hub for live event streaming to DIS.Dashboard.</Description>
   </PropertyGroup>
 
   <ItemGroup>

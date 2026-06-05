@@ -1,0 +1,98 @@
+@page "/log"
+@using DIS.Core.Models
+@using DIS.Dashboard.Services
+@inject ILogReader LogReader
+@inject DashboardHubClient HubClient
+@implements IDisposable
+
+<h1>Log Feed</h1>
+
+<div class="dis-filter-bar">
+    <label>Asset:
+        <select @bind="_filterAsset">
+            <option value="">All</option>
+            @foreach (var a in _assets)
+            {
+                <option value="@a">@a</option>
+            }
+        </select>
+    </label>
+
+    <label>Event Type:
+        <select @bind="_filterType">
+            <option value="">All</option>
+            <option value="state_change">state_change</option>
+            <option value="output_change">output_change</option>
+            <option value="orchestration_change">orchestration_change</option>
+            <option value="entry">entry</option>
+            <option value="trade_control">trade_control</option>
+            <option value="risk">risk</option>
+            <option value="execution">execution</option>
+            <option value="exit">exit</option>
+        </select>
+    </label>
+
+    <label>Level:
+        <select @bind="_filterLevel">
+            <option value="">All</option>
+            <option value="INFO">INFO</option>
+            <option value="WARNING">WARNING</option>
+            <option value="ERROR">ERROR</option>
+        </select>
+    </label>
+
+    <button @onclick="ClearDisplay">Clear Display</button>
+</div>
+
+<div class="dis-log-feed">
+    @foreach (var e in FilteredEntries.Take(200))
+    {
+        <div class="dis-log-row @e.LogLevel.ToLower()">
+            <span class="dis-log-time">@e.Timestamp.ToString("HH:mm:ss.fff")</span>
+            <span class="dis-log-asset">@e.Asset</span>
+            <span class="dis-log-cycle">C@(e.CycleId)</span>
+            <span class="dis-log-type">@e.EventType</span>
+            <span class="dis-log-payload">@e.Payload</span>
+        </div>
+    }
+</div>
+
+@code {
+    private List<DISLogEntry> _allEntries = new();
+    private HashSet<string>   _assets     = new();
+    private string _filterAsset = "";
+    private string _filterType  = "";
+    private string _filterLevel = "";
+
+    private IEnumerable<DISLogEntry> FilteredEntries => _allEntries
+        .Where(e => string.IsNullOrEmpty(_filterAsset) || e.Asset     == _filterAsset)
+        .Where(e => string.IsNullOrEmpty(_filterType)  || e.EventType == _filterType)
+        .Where(e => string.IsNullOrEmpty(_filterLevel) || e.LogLevel  == _filterLevel);
+
+    protected override async Task OnInitializedAsync()
+    {
+        var history = await LogReader.GetRecentAsync(500);
+        _allEntries = history.ToList();
+        _assets     = _allEntries.Select(e => e.Asset).ToHashSet();
+        HubClient.OnLogEntry += OnLiveEntry;
+    }
+
+    private void OnLiveEntry(DISLogEntry entry)
+    {
+        InvokeAsync(() =>
+        {
+            _allEntries.Insert(0, entry);
+            _assets.Add(entry.Asset);
+            if (_allEntries.Count > 1000) _allEntries.RemoveAt(1000);
+            StateHasChanged();
+        });
+    }
+
+    private void ClearDisplay()
+    {
+        _allEntries.Clear();
+        StateHasChanged();
+    }
+
+    public void Dispose() => HubClient.OnLogEntry -= OnLiveEntry;
+}

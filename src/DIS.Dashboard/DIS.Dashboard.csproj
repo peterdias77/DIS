@@ -1,21 +1,16 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net9.0-windows</TargetFramework>
+    <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
     <RootNamespace>DIS.Dashboard</RootNamespace>
     <AssemblyName>DIS.Dashboard</AssemblyName>
-    <OutputType>WinExe</OutputType>
-    <Description>WPF application hosting a Blazor Server UI via WebView2.</Description>
+    <Description>Blazor Server dashboard. Read-only UI for DIS. Loads history from SQLite on startup, receives live events via SignalR from DIS.Engine.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <!-- Brings in WebApplication, IWebHostBuilder, Razor, Blazor Server -->
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <!-- Blazor inside WPF via WebView2 -->
-    <PackageReference Include="Microsoft.AspNetCore.Components.WebView.Wpf" Version="9.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="9.0.0" />
   </ItemGroup>
 
   <ItemGroup>
