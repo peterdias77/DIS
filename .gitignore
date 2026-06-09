@@ -35,3 +35,4 @@ logs/
 
 # Publish / deploy artefacts
 publish/
+/src/DIS.Dashboard/Services/DashboardStateService.cs
