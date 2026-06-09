@@ -4,6 +4,7 @@ using DIS.Logger.Sqlite;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Radzen;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DIS Dashboard — Blazor Server entry point
@@ -42,6 +43,8 @@ builder.Services.AddSingleton<LogReaderService>();
 // ── SignalR hub client ────────────────────────────────────────────────────────
 builder.Services.AddSingleton<DashboardHubClient>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<DashboardHubClient>());
+
+builder.Services.AddSingleton<IDashboardStateService, DashboardStateService>();
 
 // ─────────────────────────────────────────────────────────────────────────────
 var app = builder.Build();

@@ -30,53 +30,61 @@ public sealed class DashboardHubClient : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _connection = new HubConnectionBuilder()
-            .WithUrl("http://localhost:5100/dis-hub")
-            .WithAutomaticReconnect(new[]
-            {
+        try
+        {
+            _connection = new HubConnectionBuilder()
+           .WithUrl("http://localhost:5100/dis-hub")
+           .WithAutomaticReconnect(new[]
+           {
                 TimeSpan.FromSeconds(2),
                 TimeSpan.FromSeconds(5),
                 TimeSpan.FromSeconds(10),
                 TimeSpan.FromSeconds(30)
-            })
-            .Build();
+           })
+           .Build();
 
-        // Wire the incoming event
-        _connection.On<DISLogEntry>("ReceiveLogEntry", entry =>
-        {
-            OnLogEntry?.Invoke(entry);
-        });
-
-        _connection.Reconnecting += error =>
-        {
-            _log.LogWarning("DIS Hub connection lost. Reconnecting... {Error}", error?.Message);
-            return Task.CompletedTask;
-        };
-
-        _connection.Reconnected += connectionId =>
-        {
-            _log.LogInformation("DIS Hub reconnected. ConnectionId: {Id}", connectionId);
-            return Task.CompletedTask;
-        };
-
-        // Connect with retry loop
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
+            // Wire the incoming event
+            _connection.On<DISLogEntry>("ReceiveLogEntry", entry =>
             {
-                await _connection.StartAsync(stoppingToken);
-                _log.LogInformation("Connected to DIS Engine hub.");
-                break;
-            }
-            catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
+                OnLogEntry?.Invoke(entry);
+            });
+
+            _connection.Reconnecting += error =>
             {
-                _log.LogWarning(ex, "Could not connect to DIS Engine hub. Retrying in 5s...");
-                await Task.Delay(5_000, stoppingToken);
+                _log.LogWarning("DIS Hub connection lost. Reconnecting... {Error}", error?.Message);
+                return Task.CompletedTask;
+            };
+
+            _connection.Reconnected += connectionId =>
+            {
+                _log.LogInformation("DIS Hub reconnected. ConnectionId: {Id}", connectionId);
+                return Task.CompletedTask;
+            };
+
+            // Connect with retry loop
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
+                {
+                    await _connection.StartAsync(stoppingToken);
+                    _log.LogInformation("Connected to DIS Engine hub.");
+                    break;
+                }
+                catch (Exception ex) when (!stoppingToken.IsCancellationRequested)
+                {
+                    _log.LogWarning(ex, "Could not connect to DIS Engine hub. Retrying in 5s...");
+                    await Task.Delay(5_000, stoppingToken);
+                }
             }
+
+            // Keep alive until shutdown
+            await Task.Delay(Timeout.Infinite, stoppingToken);
         }
-
-        // Keep alive until shutdown
-        await Task.Delay(Timeout.Infinite, stoppingToken);
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "Error in DashboardHubClient execution.");
+            return;
+        }       
     }
 
     public override async Task StopAsync(CancellationToken ct)
