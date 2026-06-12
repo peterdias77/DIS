@@ -1,0 +1,86 @@
+@page "/old"
+@using DIS.Dashboard.Models
+@using DIS.Dashboard.Components.Panels
+@implements IDisposable
+@inject IDashboardStateService StateService
+
+<PageTitle>DIS — Decision Intelligence System</PageTitle>
+
+<div class="dis-dashboard">
+
+    <!-- ═══════════════════════════ HEADER ═══════════════════════════════ -->
+    <header class="dis-header">
+        <div class="dis-header__title">
+            <span class="dis-header__brand">DECISION INTELLIGENCE SYSTEM</span>
+            <span class="dis-header__label">DASHBOARD</span>
+        </div>
+        <div class="dis-header__clock">
+            <span class="dis-header__time">@_now.ToString("HH:mm:ss")</span>
+            <span class="dis-header__date">@_now.ToString("yyyy-MM-dd")</span>
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════ ROW 1 ════════════════════════════════
+         Current State | Output Diagnostics | Portfolio Overview          -->
+    <div class="dis-grid dis-grid--top">
+        <CurrentSystemState State="State" />
+        <OutputDiagnostics  State="State" />
+        <PortfolioOverview  State="State" />
+    </div>
+
+    <!-- ═══════════════════════════ ROW 2 ════════════════════════════════
+         Active Trades | Rank Diagnostics | Logging Summary               -->
+    <div class="dis-grid dis-grid--mid">
+        <ActiveTrades    State="State" />
+        <RankDiagnostics State="State" />
+        <LoggingSummary  State="State" />
+    </div>
+
+    <!-- ═══════════════════════════ ROW 3 ════════════════════════════════
+         Entry & Exit Signals | Rank Stats | Logging Footer Summary       -->
+    <div class="dis-grid dis-grid--bot">
+        <EntryExitSignals     State="State" />
+        <RankStats            State="State" />
+        <LoggingFooterSummary State="State" />
+    </div>
+
+    <!-- ═══════════════════════════ FOOTER ═══════════════════════════════ -->
+    <footer class="dis-footer">
+        <span class="dis-footer__label">LOGGING INSIGHT:</span>
+        <span class="dis-footer__item">TOTAL LOGS: <strong>@State.TotalLogs</strong></span>
+        <span class="dis-footer__sep">|</span>
+        <span class="dis-footer__item">STATE CHANGES: <strong>@State.StateChanges</strong></span>
+        <span class="dis-footer__sep">|</span>
+        <span class="dis-footer__item">OUTPUT CHANGES: <strong>@State.OutputChanges</strong></span>
+        <span class="dis-footer__sep">|</span>
+        <span class="dis-footer__item">DECISION LOGS: <strong>@State.DecisionLogs</strong></span>
+        <span class="dis-footer__sep">|</span>
+        <span class="dis-footer__item">ACTION EVENTS: <strong>@State.ActionEvents</strong></span>
+    </footer>
+
+</div>
+
+@code {
+    private DashboardState State => StateService.Current;
+    private DateTime _now = DateTime.UtcNow;
+    private System.Threading.Timer? _clockTimer;
+
+    protected override void OnInitialized()
+    {
+        _clockTimer = new System.Threading.Timer(_ =>
+        {
+            _now = DateTime.UtcNow;
+            InvokeAsync(StateHasChanged);
+        }, null, 0, 1000);
+
+        StateService.OnStateChanged += HandleStateChanged;
+    }
+
+    private void HandleStateChanged() => InvokeAsync(StateHasChanged);
+
+    public void Dispose()
+    {
+        _clockTimer?.Dispose();
+        StateService.OnStateChanged -= HandleStateChanged;
+    }
+}

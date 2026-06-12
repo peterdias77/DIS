@@ -15,13 +15,15 @@ builder.WebHost.UseUrls("http://localhost:5200");
 builder.Services.AddRazorComponents()
        .AddInteractiveServerComponents();
 
+// ── Radzen ────────────────────────────────────────────────────────────────────
+// Required for RadzenTheme, RadzenDataGrid, RadzenBadge, etc.
+builder.Services.AddRadzenComponents();
+
 // ── PostgreSQL connection string ──────────────────────────────────────────────
-// Priority: Environment variable > appsettings.json
 var pgConn = Environment.GetEnvironmentVariable("DIS_PG_CONN");
 
 if (string.IsNullOrEmpty(pgConn))
 {
-    // Fallback to configuration file
     pgConn = builder.Configuration.GetConnectionString("Postgres")
         ?? throw new InvalidOperationException(
             "DIS_PG_CONN environment variable or 'Postgres' connection string is not set. " +
@@ -44,7 +46,7 @@ builder.Services.AddSingleton<IDashboardStateService, DashboardStateService>();
 // ── SignalR hub client ────────────────────────────────────────────────────────
 builder.Services.AddSingleton<DashboardHubClient>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<DashboardHubClient>());
-builder.Services.AddHostedService<DashboardStateUpdater>();
+
 // ─────────────────────────────────────────────────────────────────────────────
 var app = builder.Build();
 

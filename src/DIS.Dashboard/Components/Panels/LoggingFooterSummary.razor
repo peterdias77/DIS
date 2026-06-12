@@ -1,47 +1,54 @@
 @using DIS.Dashboard.Models
 
-<div class="dis-panel">
-    <div class="dis-panel__header">LOGGING SUMMARY</div>
-    <div class="dis-panel__body">
-
-        <div class="dis-kv-row">
-            <span class="dis-kv__label">POSITION SIZE:</span>
-            <span class="dis-badge dis-badge--cyan dis-badge--arrow-up">@State.PositionSizeLabel</span>
+<RadzenCard class="dis-panel h-100">
+    <RadzenStack Gap="0">
+        <div class="dis-panel__header">
+            <RadzenText TextStyle="TextStyle.Overline" class="dis-panel-title">LOGGING SUMMARY</RadzenText>
         </div>
 
-        <div class="dis-kv-row">
-            <span class="dis-kv__label">ENTERED SIZE:</span>
-            <span class="dis-kv__value">@State.EnteredSize LOTS</span>
-        </div>
+        <RadzenStack Gap="5px" class="dis-panel__body">
 
-        <div class="dis-stat-row">
-            <span class="dis-stat__label">TOTAL LOGS</span>
-            <span class="dis-stat__value">@State.TotalLogs</span>
-        </div>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="dis-kv-row">
+                <RadzenText TextStyle="TextStyle.Caption" class="dis-label">POSITION SIZE</RadzenText>
+                <RadzenBadge Text="@($"{State.PositionSizeLabel} ↑")" BadgeStyle="BadgeStyle.Info" class="dis-badge-sm" />
+            </RadzenStack>
 
-        <div class="dis-stat-row">
-            <span class="dis-stat__label">ACTIVE CYCLE:</span>
-            <span class="dis-stat__value dis-badge dis-badge--orange">@State.ActiveCycleLabel</span>
-        </div>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="dis-kv-row">
+                <RadzenText TextStyle="TextStyle.Caption" class="dis-label">ENTERED SIZE</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body2" Style="color:var(--rz-text-color);">@State.EnteredSize LOTS</RadzenText>
+            </RadzenStack>
 
-        <div class="dis-stat-row">
-            <span class="dis-stat__label">LAST LOGGED:</span>
-            <span class="dis-stat__value dis-badge dis-badge--orange">@State.LastLogged</span>
-        </div>
+            <RadzenDivider Style="margin:2px 0; border-color:var(--rz-border-disabled-color);" />
 
-        <div class="dis-kv-row">
-            <span class="dis-kv__label">STOP LOSS:</span>
-            <span class="dis-kv__value">@State.StopLossDisplay</span>
-            <span class="dis-badge dis-badge--green dis-badge--xs">↑</span>
-        </div>
+            <div class="dis-stat-row">
+                <RadzenText TextStyle="TextStyle.Caption" Style="color:var(--rz-text-disabled-color);">TOTAL LOGS</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1" Style="color:var(--rz-text-color); font-weight:700;">@State.TotalLogs</RadzenText>
+            </div>
 
-        <div class="dis-kv-row">
-            <span class="dis-kv__label">LAST ERROR:</span>
-            <span class="dis-badge dis-badge--dim">@State.LastError</span>
-        </div>
+            <div class="dis-stat-row">
+                <RadzenText TextStyle="TextStyle.Caption" Style="color:var(--rz-text-disabled-color);">ACTIVE CYCLE</RadzenText>
+                <RadzenBadge Text="@State.ActiveCycleLabel" BadgeStyle="BadgeStyle.Warning" class="dis-badge-sm" />
+            </div>
 
-    </div>
-</div>
+            <div class="dis-stat-row">
+                <RadzenText TextStyle="TextStyle.Caption" Style="color:var(--rz-text-disabled-color);">LAST LOGGED</RadzenText>
+                <RadzenBadge Text="@State.LastLogged" BadgeStyle="BadgeStyle.Warning" class="dis-badge-sm" />
+            </div>
+
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="dis-kv-row">
+                <RadzenText TextStyle="TextStyle.Caption" class="dis-label">STOP LOSS</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body2" Style="color:var(--rz-text-color);">@State.StopLossDisplay</RadzenText>
+                <RadzenBadge Text="↑" BadgeStyle="BadgeStyle.Success" class="dis-badge-xs" />
+            </RadzenStack>
+
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="dis-kv-row">
+                <RadzenText TextStyle="TextStyle.Caption" class="dis-label">LAST ERROR</RadzenText>
+                <RadzenBadge Text="@State.LastError" BadgeStyle="BadgeStyle.Secondary" class="dis-badge-sm" />
+            </RadzenStack>
+
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
 
 @code {
     [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;

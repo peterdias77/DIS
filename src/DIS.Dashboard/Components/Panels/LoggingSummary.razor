@@ -1,20 +1,24 @@
 @using DIS.Dashboard.Models
 
-<div class="dis-panel">
-    <div class="dis-panel__header">LOGGING SUMMARY</div>
-    <div class="dis-panel__body">
+<RadzenCard class="dis-panel h-100">
+    <RadzenStack Gap="0">
+        <div class="dis-panel__header">
+            <RadzenText TextStyle="TextStyle.Overline" class="dis-panel-title">LOGGING SUMMARY</RadzenText>
+        </div>
 
-        @foreach (var entry in State.LogEntries)
-        {
-            <div class="dis-log-entry">
-                <span class="dis-log__time">@entry.Time</span>
-                <span class="dis-log__type @GetTypeClass(entry.Type)">@entry.Type</span>
-                <span class="dis-log__detail">@entry.Detail</span>
-            </div>
-        }
+        <RadzenStack Gap="0" class="dis-panel__body" Style="overflow:hidden; flex:1;">
+            @foreach (var entry in State.LogEntries)
+            {
+                <div class="dis-log-entry">
+                    <RadzenText TextStyle="TextStyle.Caption" class="dis-log__time">@entry.Time</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Caption" class=@($"dis-log__type {@GetTypeClass(entry.Type)}")>@entry.Type</RadzenText>
+                    <RadzenText TextStyle="TextStyle.Caption" class="dis-log__detail">@entry.Detail</RadzenText>
+                </div>
+            }
+        </RadzenStack>
 
-    </div>
-</div>
+    </RadzenStack>
+</RadzenCard>
 
 @code {
     [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;

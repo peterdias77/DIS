@@ -1,37 +1,68 @@
 @using DIS.Dashboard.Models
 
-<div class="dis-panel dis-panel--trades">
-    <div class="dis-panel__header">ACTIVE TRADES</div>
-    <div class="dis-trades-table">
-
-        <div class="dis-trades-table__head">
-            <span>ASSET</span>
-            <span>DIRECTION</span>
-            <span>POSITION</span>
-            <span>ENTRY</span>
-            <span>P/NL</span>
-            <span>STOP LOSS</span>
+<RadzenCard class="dis-panel dis-panel--trades h-100">
+    <RadzenStack Gap="0">
+        <div class="dis-panel__header">
+            <RadzenText TextStyle="TextStyle.Overline" class="dis-panel-title">ACTIVE TRADES</RadzenText>
         </div>
 
-        @foreach (var (trade, idx) in State.ActiveTrades.Select((t, i) => (t, i + 1)))
-        {
-            <div class="dis-trades-table__row">
-                <span class="dis-trade__asset">@idx. @trade.Asset</span>
-                <span class="dis-badge @(trade.Direction == "LONG" ? "dis-badge--green" : "dis-badge--red") dis-badge--dir">
-                    @trade.Direction
-                    <span class="dis-badge__arrow">@(trade.Direction == "LONG" ? "▲" : "▼")</span>
-                </span>
-                <span class="dis-trade__pos">@trade.Position</span>
-                <span class="dis-trade__entry">@trade.EntryPrice.ToString("N2")</span>
-                <span class="dis-trade__pnl @(trade.Pnl >= 0 ? "dis-pnl--pos" : "dis-pnl--neg")">
-                    @(trade.Pnl >= 0 ? "+" : "")$@trade.Pnl.ToString("N2")
-                </span>
-                <span class="dis-trade__sl">@trade.StopLoss.ToString("N2")</span>
-            </div>
-        }
+        <RadzenDataGrid Data="@State.ActiveTrades"
+                        TItem="ActiveTrade"
+                        AllowSorting="false"
+                        AllowFiltering="false"
+                        ShowPagingSummary="false"
+                        AllowPaging="false"
+                        EmptyText="No active trades"
+                        class="dis-trade-grid"
+                        Style="background:transparent; border:none;">
 
-    </div>
-</div>
+            <Columns>
+                <RadzenDataGridColumn TItem="ActiveTrade" Title="ASSET" Width="100px">
+                    <Template Context="t">
+                        <RadzenText TextStyle="TextStyle.Body2" Style="color:#fff; font-weight:600;">@t.Asset</RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="ActiveTrade" Title="DIRECTION" Width="90px">
+                    <Template Context="t">
+                        <RadzenBadge Text="@($"{t.Direction} {(t.Direction == "LONG" ? "▲" : "▼")}")"
+                                     BadgeStyle="@(t.Direction == "LONG" ? BadgeStyle.Success : BadgeStyle.Danger)"
+                                     class="dis-badge-sm" />
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="ActiveTrade" Property="Position" Title="POSITION" Width="90px">
+                    <Template Context="t">
+                        <RadzenText TextStyle="TextStyle.Body2" Style="color:var(--rz-text-color);">@t.Position</RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="ActiveTrade" Title="ENTRY" Width="80px">
+                    <Template Context="t">
+                        <RadzenText TextStyle="TextStyle.Body2" Style="color:var(--rz-text-color);">@t.EntryPrice.ToString("N2")</RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="ActiveTrade" Title="P/NL" Width="90px">
+                    <Template Context="t">
+                        <RadzenText TextStyle="TextStyle.Body2"
+                                    Style="@($"font-weight:700; color:{(t.Pnl >= 0 ? "var(--rz-success)" : "var(--rz-danger)")};")">
+                            @(t.Pnl >= 0 ? "+" : "")$@t.Pnl.ToString("N2")
+                        </RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+
+                <RadzenDataGridColumn TItem="ActiveTrade" Title="STOP LOSS">
+                    <Template Context="t">
+                        <RadzenText TextStyle="TextStyle.Body2" Style="color:var(--rz-warning);">@t.StopLoss.ToString("N2")</RadzenText>
+                    </Template>
+                </RadzenDataGridColumn>
+            </Columns>
+
+        </RadzenDataGrid>
+
+    </RadzenStack>
+</RadzenCard>
 
 @code {
     [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;

@@ -8,55 +8,58 @@
 
 <div class="dis-dashboard">
 
-    <!-- ═══════════════════════════ HEADER ═══════════════════════════════ -->
-    <header class="dis-header">
-        <div class="dis-header__title">
-            <span class="dis-header__brand">DECISION INTELLIGENCE SYSTEM</span>
-            <span class="dis-header__label">DASHBOARD</span>
-        </div>
-        <div class="dis-header__clock">
-            <span class="dis-header__time">@_now.ToString("HH:mm:ss")</span>
-            <span class="dis-header__date">@_now.ToString("yyyy-MM-dd")</span>
-        </div>
-    </header>
+    <!-- ═══════════ HEADER ═══════════ -->
+    <RadzenRow class="dis-header" JustifyContent="JustifyContent.SpaceBetween" AlignItems="AlignItems.Center" Gap="0">
+        <RadzenColumn>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="12px">
+                <RadzenText TextStyle="TextStyle.H6" class="dis-brand">DECISION INTELLIGENCE SYSTEM</RadzenText>
+                <RadzenBadge Text="DASHBOARD" BadgeStyle="BadgeStyle.Info" class="dis-header-badge" />
+            </RadzenStack>
+        </RadzenColumn>
+        <RadzenColumn class="rz-text-align-end">
+            <RadzenText TextStyle="TextStyle.Body2" class="dis-clock-time">@_now.ToString("HH:mm:ss")</RadzenText>
+            <RadzenText TextStyle="TextStyle.Caption" Style="color: var(--rz-text-disabled-color);">@_now.ToString("yyyy-MM-dd")</RadzenText>
+        </RadzenColumn>
+    </RadzenRow>
 
-    <!-- ═══════════════════════════ ROW 1 ════════════════════════════════
-         Current State | Output Diagnostics | Portfolio Overview          -->
+    <!-- ═══════════ ROW 1 ═══════════ -->
     <div class="dis-grid dis-grid--top">
         <CurrentSystemState State="State" />
         <OutputDiagnostics  State="State" />
         <PortfolioOverview  State="State" />
     </div>
 
-    <!-- ═══════════════════════════ ROW 2 ════════════════════════════════
-         Active Trades | Rank Diagnostics | Logging Summary               -->
+    <!-- ═══════════ ROW 2 ═══════════ -->
     <div class="dis-grid dis-grid--mid">
         <ActiveTrades    State="State" />
         <RankDiagnostics State="State" />
         <LoggingSummary  State="State" />
     </div>
 
-    <!-- ═══════════════════════════ ROW 3 ════════════════════════════════
-         Entry & Exit Signals | Rank Stats | Logging Footer Summary       -->
+    <!-- ═══════════ ROW 3 ═══════════ -->
     <div class="dis-grid dis-grid--bot">
         <EntryExitSignals     State="State" />
         <RankStats            State="State" />
         <LoggingFooterSummary State="State" />
     </div>
 
-    <!-- ═══════════════════════════ FOOTER ═══════════════════════════════ -->
-    <footer class="dis-footer">
-        <span class="dis-footer__label">LOGGING INSIGHT:</span>
-        <span class="dis-footer__item">TOTAL LOGS: <strong>@State.TotalLogs</strong></span>
-        <span class="dis-footer__sep">|</span>
-        <span class="dis-footer__item">STATE CHANGES: <strong>@State.StateChanges</strong></span>
-        <span class="dis-footer__sep">|</span>
-        <span class="dis-footer__item">OUTPUT CHANGES: <strong>@State.OutputChanges</strong></span>
-        <span class="dis-footer__sep">|</span>
-        <span class="dis-footer__item">DECISION LOGS: <strong>@State.DecisionLogs</strong></span>
-        <span class="dis-footer__sep">|</span>
-        <span class="dis-footer__item">ACTION EVENTS: <strong>@State.ActionEvents</strong></span>
-    </footer>
+    <!-- ═══════════ FOOTER ═══════════ -->
+    <RadzenRow class="dis-footer" AlignItems="AlignItems.Center" Gap="0">
+        <RadzenColumn Size="12">
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="12px" Wrap="FlexWrap.Wrap">
+                <RadzenText TextStyle="TextStyle.Overline" Style="color:var(--rz-text-disabled-color); letter-spacing:1.5px;">LOGGING INSIGHT</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body2">TOTAL LOGS: <strong style="color:var(--rz-text-color);">@State.TotalLogs</strong></RadzenText>
+                <span class="dis-sep">|</span>
+                <RadzenText TextStyle="TextStyle.Body2">STATE CHANGES: <strong style="color:var(--rz-text-color);">@State.StateChanges</strong></RadzenText>
+                <span class="dis-sep">|</span>
+                <RadzenText TextStyle="TextStyle.Body2">OUTPUT CHANGES: <strong style="color:var(--rz-text-color);">@State.OutputChanges</strong></RadzenText>
+                <span class="dis-sep">|</span>
+                <RadzenText TextStyle="TextStyle.Body2">DECISION LOGS: <strong style="color:var(--rz-text-color);">@State.DecisionLogs</strong></RadzenText>
+                <span class="dis-sep">|</span>
+                <RadzenText TextStyle="TextStyle.Body2">ACTION EVENTS: <strong style="color:var(--rz-text-color);">@State.ActionEvents</strong></RadzenText>
+            </RadzenStack>
+        </RadzenColumn>
+    </RadzenRow>
 
 </div>
 

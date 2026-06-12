@@ -1,50 +1,59 @@
 @using DIS.Dashboard.Models
 
-<div class="dis-panel">
-    <div class="dis-panel__header">PORTFOLIO OVERVIEW</div>
-    <div class="dis-panel__body">
-
-        <div class="dis-kv-row dis-kv-row--cycle">
-            <span class="dis-kv__label">CYCLE:</span>
-            <span class="dis-kv__value">
-                RANK <strong>@State.CycleRank</strong> OF <strong>@State.CycleMax</strong>
-            </span>
-            <span class="dis-badge dis-badge--cyan dis-badge--sm">@State.CycleAsset</span>
+<RadzenCard class="dis-panel h-100">
+    <RadzenStack Gap="0">
+        <div class="dis-panel__header">
+            <RadzenText TextStyle="TextStyle.Overline" class="dis-panel-title">PORTFOLIO OVERVIEW</RadzenText>
         </div>
 
-        <div class="dis-kv-row">
-            <span class="dis-kv__label">ASSETS IN CYCLE:</span>
-            <span class="dis-kv__value">@State.AssetsInCycle</span>
-        </div>
+        <RadzenStack Gap="5px" class="dis-panel__body">
 
-        <div class="dis-kv-row">
-            <span class="dis-kv__label">TRADING PERMISSION:</span>
-            <span class="dis-badge @(State.TradingPermission == "ALLOW" ? "dis-badge--green" : "dis-badge--red")">
-                @State.TradingPermission
-            </span>
-        </div>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="dis-kv-row" Wrap="FlexWrap.Wrap">
+                <RadzenText TextStyle="TextStyle.Caption" class="dis-label">CYCLE</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body2" Style="color:var(--rz-text-color);">
+                    RANK <strong>@State.CycleRank</strong> OF <strong>@State.CycleMax</strong>
+                </RadzenText>
+                <RadzenBadge Text="@State.CycleAsset" BadgeStyle="BadgeStyle.Info" class="dis-badge-sm" />
+            </RadzenStack>
 
-        <div class="dis-kv-row dis-kv-row--pnl">
-            <span class="dis-kv__label">OPEN P/L:</span>
-            <span class="dis-pnl @(State.OpenPnl >= 0 ? "dis-pnl--pos" : "dis-pnl--neg")">
-                @(State.OpenPnl >= 0 ? "+" : "")$@State.OpenPnl.ToString("N2")
-            </span>
-        </div>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="dis-kv-row">
+                <RadzenText TextStyle="TextStyle.Caption" class="dis-label">ASSETS IN CYCLE</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body2" Style="color:var(--rz-text-color);">@State.AssetsInCycle</RadzenText>
+            </RadzenStack>
 
-        <div class="dis-kv-row dis-kv-row--pnl">
-            <span class="dis-kv__label">TOTAL P/L:</span>
-            <span class="dis-pnl dis-pnl--lg @(State.TotalPnl >= 0 ? "dis-pnl--pos" : "dis-pnl--neg")">
-                @(State.TotalPnl >= 0 ? "+" : "")$@State.TotalPnl.ToString("N2")
-            </span>
-        </div>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="dis-kv-row">
+                <RadzenText TextStyle="TextStyle.Caption" class="dis-label">TRADING PERMISSION</RadzenText>
+                <RadzenBadge Text="@State.TradingPermission"
+                             BadgeStyle="@(State.TradingPermission == "ALLOW" ? BadgeStyle.Success : BadgeStyle.Danger)"
+                             class="dis-badge-sm" />
+            </RadzenStack>
 
-        <div class="dis-kv-row">
-            <span class="dis-kv__label">SYSTEM STATE:</span>
-            <span class="dis-badge dis-badge--cyan dis-badge--arrow-down">@State.SystemState</span>
-        </div>
+            <RadzenDivider Style="margin:2px 0; border-color:var(--rz-border-disabled-color);" />
 
-    </div>
-</div>
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="dis-kv-row">
+                <RadzenText TextStyle="TextStyle.Caption" class="dis-label">OPEN P/L</RadzenText>
+                <RadzenText TextStyle="TextStyle.Body1"
+                            Style="@($"font-weight:700; color:{(State.OpenPnl >= 0 ? "var(--rz-success)" : "var(--rz-danger)")};")">
+                    @(State.OpenPnl >= 0 ? "+" : "")$@State.OpenPnl.ToString("N2")
+                </RadzenText>
+            </RadzenStack>
+
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="dis-kv-row">
+                <RadzenText TextStyle="TextStyle.Caption" class="dis-label">TOTAL P/L</RadzenText>
+                <RadzenText TextStyle="TextStyle.H6"
+                            Style="@($"font-weight:700; color:{(State.TotalPnl >= 0 ? "var(--rz-success)" : "var(--rz-danger)")};")">
+                    @(State.TotalPnl >= 0 ? "+" : "")$@State.TotalPnl.ToString("N2")
+                </RadzenText>
+            </RadzenStack>
+
+            <RadzenStack Orientation="Orientation.Horizontal" AlignItems="AlignItems.Center" Gap="6px" class="dis-kv-row">
+                <RadzenText TextStyle="TextStyle.Caption" class="dis-label">SYSTEM STATE</RadzenText>
+                <RadzenBadge Text="@($"{State.SystemState} ↓")" BadgeStyle="BadgeStyle.Info" class="dis-badge-sm" />
+            </RadzenStack>
+
+        </RadzenStack>
+    </RadzenStack>
+</RadzenCard>
 
 @code {
     [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;

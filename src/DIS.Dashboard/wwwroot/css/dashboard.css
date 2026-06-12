@@ -1,41 +1,41 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   DIS DASHBOARD — Dark Theme Stylesheet
-   Palette:
-     --bg-base:     #0a0d12   (near-black, body)
-     --bg-panel:    #0f1520   (panel background)
-     --bg-panel-hd: #111a28   (panel header strip)
-     --bg-row:      #141f2e   (alternating row)
-     --border:      #1c2d42   (panel border)
-     --cyan:        #00c8ff   (primary accent — direction, alignment)
-     --green:       #00e676   (positive / ALLOW / VALID)
-     --yellow:      #ffd600   (warning / MEDIUM risk)
-     --orange:      #ff9100   (strategy badges)
-     --red:         #ff3d5a   (SHORT / negative / BREACH)
-     --dim:         #2a3d52   (inactive / dim badges)
-     --text:        #c8d8e8   (primary text)
-     --text-muted:  #5a7a96   (labels / secondary)
-     --text-strong: #ffffff   (high-emphasis values)
+   DIS DASHBOARD — Radzen Dark Theme Integration
+   Radzen Dark provides the base design tokens. This file:
+     1. Maps DIS palette to Radzen's CSS variables.
+     2. Overrides Radzen component chrome (cards, grids, badges) to match DIS aesthetic.
+     3. Retains DIS-specific structural elements (sparklines, barsets, rank boxes, donut).
+   ─────────────────────────────────────────────────────────────────────────
+   Radzen Dark key tokens (auto-injected by <RadzenTheme Theme="material" /> or dark variant):
+     --rz-base-background-color   #1e1e2e  → panel bg
+     --rz-text-color              #ced4da  → primary text
+     --rz-text-disabled-color     #5a7a96  → muted labels
+     --rz-primary                 #00c8ff  → cyan accent
+     --rz-success                 #00e676  → green
+     --rz-warning                 #ffd600  → yellow
+     --rz-danger                  #ff3d5a  → red
+     --rz-secondary               #2a3d52  → dim
+     --rz-border-disabled-color   #1c2d42  → borders
 ═══════════════════════════════════════════════════════════════════════════ */
 
+/* ── Map DIS variables to Radzen tokens ─────────────────────────────────── */
 :root {
     --bg-base:      #0a0d12;
-    --bg-panel:     #0f1520;
+    --bg-panel:     var(--rz-base-background-color, #0f1520);
     --bg-panel-hd:  #111a28;
     --bg-row:       #141f2e;
-    --border:       #1c2d42;
-    --cyan:         #00c8ff;
+    --border:       var(--rz-border-disabled-color, #1c2d42);
+    --cyan:         var(--rz-primary, #00c8ff);
     --cyan-dim:     #007aaa;
-    --green:        #00e676;
-    --yellow:       #ffd600;
+    --green:        var(--rz-success, #00e676);
+    --yellow:       var(--rz-warning, #ffd600);
     --orange:       #ff9100;
-    --red:          #ff3d5a;
+    --red:          var(--rz-danger, #ff3d5a);
     --dim:          #1e2d3d;
-    --text:         #c8d8e8;
-    --text-muted:   #5a7a96;
+    --text:         var(--rz-text-color, #c8d8e8);
+    --text-muted:   var(--rz-text-disabled-color, #5a7a96);
     --text-strong:  #ffffff;
     --font-mono:    'Courier New', 'Lucida Console', monospace;
-    --font-ui:      'Segoe UI', 'Arial', sans-serif;
-    --panel-radius: 4px;
+    --panel-radius: var(--rz-border-radius, 4px);
     --gap:          6px;
 }
 
@@ -50,8 +50,7 @@ html, body {
     overflow: hidden;
 }
 
-/* ── Layout ─────────────────────────────────────────────────────────────── */
-
+/* ── Dashboard shell ────────────────────────────────────────────────────── */
 .dis-dashboard {
     display: flex;
     flex-direction: column;
@@ -61,108 +60,86 @@ html, body {
     background: var(--bg-base);
 }
 
-/* ── Header ─────────────────────────────────────────────────────────────── */
-
+/* ── Header row ─────────────────────────────────────────────────────────── */
 .dis-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 6px 10px;
-    background: var(--bg-panel-hd);
-    border: 1px solid var(--border);
-    border-radius: var(--panel-radius);
+    padding: 6px 12px !important;
+    background: var(--bg-panel-hd) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--panel-radius) !important;
     flex-shrink: 0;
+    /* Override RadzenRow defaults */
+    margin: 0 !important;
 }
 
-.dis-header__brand {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--text-strong);
+.dis-brand {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    letter-spacing: 2px !important;
+    color: var(--text-strong) !important;
     text-transform: uppercase;
+    font-family: var(--font-mono) !important;
 }
 
-.dis-header__label {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 2px;
-    color: var(--cyan);
-    margin-left: 10px;
-    text-transform: uppercase;
+.dis-header-badge.rz-badge {
+    background: rgba(0, 200, 255, 0.15) !important;
+    color: var(--cyan) !important;
+    border: 1px solid var(--cyan-dim) !important;
+    font-size: 10px !important;
+    letter-spacing: 1.5px !important;
+    font-family: var(--font-mono) !important;
 }
 
-.dis-header__clock {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-}
-
-.dis-header__time {
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--cyan);
-    letter-spacing: 1px;
-}
-
-.dis-header__date {
-    font-size: 10px;
-    color: var(--text-muted);
+.dis-clock-time {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: var(--cyan) !important;
+    letter-spacing: 1px !important;
+    font-family: var(--font-mono) !important;
+    line-height: 1.2 !important;
 }
 
 /* ── Grid rows ──────────────────────────────────────────────────────────── */
-
 .dis-grid {
     display: grid;
     gap: var(--gap);
     flex-shrink: 0;
 }
 
-.dis-grid--top {
-    grid-template-columns: 1fr 1.8fr 1fr;
-    flex: 1.2;
-}
+.dis-grid--top { grid-template-columns: 1fr 1.8fr 1fr; flex: 1.2; }
+.dis-grid--mid { grid-template-columns: 1.8fr 1fr 1fr; flex: 1.1; }
+.dis-grid--bot { grid-template-columns: 1fr 1fr 1fr;   flex: 0.9; }
 
-.dis-grid--mid {
-    grid-template-columns: 1.8fr 1fr 1fr;
-    flex: 1.1;
-}
-
-.dis-grid--bot {
-    grid-template-columns: 1fr 1fr 1fr;
-    flex: 0.9;
-}
-
-/* ── Panel ─────────────────────────────────────────────────────────────── */
-
+/* ── Radzen Card → DIS Panel ─────────────────────────────────────────────  */
+.dis-panel.rz-card,
 .dis-panel {
-    background: var(--bg-panel);
-    border: 1px solid var(--border);
-    border-radius: var(--panel-radius);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-height: 0;
+    background: var(--bg-panel) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--panel-radius) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    min-height: 0 !important;
+    padding: 0 !important;         /* card inner padding removed; body handles it */
+    box-shadow: none !important;
 }
 
-.dis-panel--wide { }
-.dis-panel--trades { }
+.dis-panel.h-100 { height: 100%; }
 
 .dis-panel__header {
     background: var(--bg-panel-hd);
     border-bottom: 1px solid var(--border);
     padding: 5px 10px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    color: var(--text-muted);
-    text-transform: uppercase;
     flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
 
-.dis-header__pencil { color: var(--cyan); cursor: pointer; }
+.dis-panel-title {
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    letter-spacing: 1.5px !important;
+    color: var(--text-muted) !important;
+    text-transform: uppercase !important;
+    font-family: var(--font-mono) !important;
+}
 
 .dis-panel__body {
     padding: 8px 10px;
@@ -177,11 +154,10 @@ html, body {
 .dis-panel__body--cols {
     flex-direction: row;
     gap: 0;
+    padding: 0;
 }
 
-.dis-panel__body--rank {
-    gap: 8px;
-}
+.dis-panel__body--rank { gap: 8px; }
 
 .dis-panel__body--signals {
     flex-direction: row;
@@ -190,7 +166,6 @@ html, body {
 }
 
 /* ── KV rows ────────────────────────────────────────────────────────────── */
-
 .dis-kv-row {
     display: flex;
     align-items: center;
@@ -198,67 +173,98 @@ html, body {
     min-height: 18px;
 }
 
-.dis-kv-row--footer {
-    margin-top: auto;
-    border-top: 1px solid var(--border);
-    padding-top: 5px;
+.dis-label {
+    color: var(--text-muted) !important;
+    font-size: 10px !important;
+    letter-spacing: 0.5px !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    font-family: var(--font-mono) !important;
 }
 
-.dis-kv-row--pnl { margin-top: 2px; }
-
-.dis-kv-row--cycle { flex-wrap: wrap; }
-
-.dis-kv-row--rerank { margin-top: 4px; }
-
-.dis-kv__label {
-    color: var(--text-muted);
-    font-size: 10px;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
-    flex-shrink: 0;
+/* ── Radzen Badge overrides ──────────────────────────────────────────────── */
+.dis-badge-sm.rz-badge,
+.rz-badge.dis-badge-sm {
+    font-size: 9px !important;
+    padding: 1px 6px !important;
+    border-radius: 2px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase !important;
+    white-space: nowrap !important;
+    font-family: var(--font-mono) !important;
 }
 
-.dis-kv__value {
-    color: var(--text-strong);
-    font-size: 11px;
-    font-weight: 600;
+.dis-badge-xs.rz-badge,
+.rz-badge.dis-badge-xs {
+    font-size: 9px !important;
+    padding: 0 4px !important;
+    border-radius: 2px !important;
+    font-family: var(--font-mono) !important;
 }
 
-.dis-kv__value--normal { color: var(--text); }
-.dis-kv__value--strong { color: var(--text-strong); font-size: 12px; font-weight: 700; letter-spacing: 1px; }
-.dis-kv__muted { color: var(--text-muted); }
+/* Restyle Radzen badge colour classes to match DIS palette */
+.rz-badge.rz-badge-success  { background: #00391a !important; color: var(--green) !important; border: 1px solid #00562a !important; }
+.rz-badge.rz-badge-info     { background: #002840 !important; color: var(--cyan)  !important; border: 1px solid var(--cyan-dim) !important; }
+.rz-badge.rz-badge-warning  { background: #332800 !important; color: var(--yellow) !important; border: 1px solid #665200 !important; }
+.rz-badge.rz-badge-danger   { background: #3d0010 !important; color: var(--red)   !important; border: 1px solid #7a0020 !important; }
+.rz-badge.rz-badge-secondary{ background: var(--dim) !important; color: var(--text-muted) !important; border: 1px solid #253545 !important; }
 
-/* ── Badges ─────────────────────────────────────────────────────────────── */
-
-.dis-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    padding: 1px 6px;
-    border-radius: 2px;
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.8px;
-    text-transform: uppercase;
-    white-space: nowrap;
+/* ── Radzen DataGrid → DIS Trades table ─────────────────────────────────── */
+.dis-trade-grid .rz-data-grid {
+    border: none !important;
+    background: transparent !important;
 }
 
-.dis-badge--green   { background: #00391a; color: var(--green); border: 1px solid #00562a; }
-.dis-badge--cyan    { background: #002840; color: var(--cyan); border: 1px solid var(--cyan-dim); }
-.dis-badge--yellow  { background: #332800; color: var(--yellow); border: 1px solid #665200; }
-.dis-badge--orange  { background: #3d1f00; color: var(--orange); border: 1px solid #7a3f00; }
-.dis-badge--red     { background: #3d0010; color: var(--red); border: 1px solid #7a0020; }
-.dis-badge--dim     { background: var(--dim); color: var(--text-muted); border: 1px solid #253545; }
-.dis-badge--risk    { background: var(--dim); color: var(--text-muted); border: 1px solid #253545; font-size: 9px; }
-.dis-badge--sm      { font-size: 9px; padding: 0 4px; }
-.dis-badge--xs      { font-size: 9px; padding: 0 3px; }
-.dis-badge--dir     { min-width: 48px; justify-content: space-between; }
+.dis-trade-grid .rz-data-grid-header,
+.dis-trade-grid .rz-column-title {
+    background: var(--bg-panel-hd) !important;
+    color: var(--text-muted) !important;
+    font-size: 9px !important;
+    font-weight: 500 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.8px !important;
+    border-bottom: 1px solid var(--border) !important;
+    font-family: var(--font-mono) !important;
+    padding: 6px 10px !important;
+}
 
-.dis-badge--arrow-up::after   { content: '↑'; margin-left: 3px; }
-.dis-badge--arrow-down::after { content: '↓'; margin-left: 3px; }
+.dis-trade-grid .rz-data-row td,
+.dis-trade-grid .rz-body-row td {
+    padding: 6px 10px !important;
+    border-bottom: 1px solid var(--border) !important;
+    color: var(--text) !important;
+    font-size: 11px !important;
+    font-family: var(--font-mono) !important;
+    background: transparent !important;
+}
+
+.dis-trade-grid .rz-data-row:hover td,
+.dis-trade-grid .rz-body-row:hover td {
+    background: var(--bg-row) !important;
+}
+
+.dis-trade-grid .rz-empty-row td {
+    color: var(--text-muted) !important;
+    font-size: 11px !important;
+    padding: 16px 10px !important;
+    font-family: var(--font-mono) !important;
+}
+
+.dis-trade-grid .rz-datatable-scrollable-header {
+    background: var(--bg-panel-hd) !important;
+}
+
+/* ── RadzenText overrides ────────────────────────────────────────────────── */
+.rz-text { font-family: var(--font-mono) !important; }
+
+/* ── RadzenDivider override ──────────────────────────────────────────────── */
+.rz-divider { border-color: var(--border) !important; }
+
+/* ── RadzenRow / RadzenStack margin resets ───────────────────────────────── */
+.rz-row { margin: 0 !important; }
 
 /* ── Sparklines ─────────────────────────────────────────────────────────── */
-
 .dis-sparkline {
     display: flex;
     align-items: flex-end;
@@ -276,13 +282,12 @@ html, body {
 .dis-sparkline--green .dis-sparkline__bar { background: var(--green); }
 .dis-sparkline--dim   .dis-sparkline__bar { background: var(--text-muted); opacity: 0.6; }
 
-/* ── Bar set (log bars) ─────────────────────────────────────────────────── */
-
+/* ── Bar set (log progress) ─────────────────────────────────────────────── */
 .dis-barset {
     display: flex;
     gap: 2px;
     align-items: center;
-    margin-left: 8px;
+    margin-left: auto;
 }
 
 .dis-barset__bar {
@@ -294,17 +299,7 @@ html, body {
 
 .dis-barset__bar--lit { background: var(--cyan); }
 
-/* ── Regime value ────────────────────────────────────────────────────────── */
-
-.dis-regime-value {
-    color: var(--cyan);
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 1px;
-}
-
 /* ── Output Diagnostics columns ─────────────────────────────────────────── */
-
 .dis-diag-col {
     flex: 1;
     padding: 8px 10px;
@@ -316,14 +311,7 @@ html, body {
 
 .dis-diag-col:last-child { border-right: none; }
 
-/* ── Re-rank bar ─────────────────────────────────────────────────────────── */
-
-.dis-rerank {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
+/* ── Re-rank display ─────────────────────────────────────────────────────── */
 .dis-rerank__next {
     background: var(--bg-panel-hd);
     border: 1px solid var(--cyan-dim);
@@ -332,10 +320,10 @@ html, body {
     padding: 1px 8px;
     border-radius: 2px;
     font-weight: 600;
+    font-family: var(--font-mono);
 }
 
 /* ── Rank strip ──────────────────────────────────────────────────────────── */
-
 .dis-rank-strip {
     display: flex;
     gap: 3px;
@@ -362,6 +350,7 @@ html, body {
     font-size: 13px;
     font-weight: 700;
     color: var(--text);
+    font-family: var(--font-mono);
 }
 
 .dis-rank-strip__slot--active .dis-rank-strip__num { color: var(--cyan); }
@@ -369,69 +358,12 @@ html, body {
 .dis-rank-strip__sub {
     font-size: 9px;
     color: var(--text-muted);
+    font-family: var(--font-mono);
 }
-
-/* ── Portfolio P/L ───────────────────────────────────────────────────────── */
-
-.dis-pnl {
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-}
-
-.dis-pnl--lg { font-size: 18px; }
-.dis-pnl--pos { color: var(--green); }
-.dis-pnl--neg { color: var(--red); }
-
-/* ── Active Trades table ─────────────────────────────────────────────────── */
-
-.dis-trades-table {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    flex: 1;
-}
-
-.dis-trades-table__head {
-    display: grid;
-    grid-template-columns: 1fr 80px 80px 70px 80px 80px;
-    padding: 4px 10px;
-    background: var(--bg-panel-hd);
-    font-size: 9px;
-    color: var(--text-muted);
-    letter-spacing: 0.8px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-}
-
-.dis-trades-table__row {
-    display: grid;
-    grid-template-columns: 1fr 80px 80px 70px 80px 80px;
-    padding: 6px 10px;
-    border-bottom: 1px solid var(--border);
-    align-items: center;
-    transition: background 0.15s;
-}
-
-.dis-trades-table__row:hover { background: var(--bg-row); }
-.dis-trades-table__row:last-child { border-bottom: none; }
-
-.dis-trade__asset  { color: var(--text-strong); font-weight: 600; }
-.dis-trade__pos    { color: var(--text); }
-.dis-trade__entry  { color: var(--text); }
-.dis-trade__pnl    { font-weight: 700; }
-.dis-trade__sl     { color: var(--yellow); }
 
 /* ── Rank grid (diagnostics) ─────────────────────────────────────────────── */
-
-.dis-rank-grid {
-    display: flex;
-    gap: 4px;
-}
-
-.dis-rank-grid--sub {
-    margin-top: -2px;
-}
+.dis-rank-grid { display: flex; gap: 4px; }
+.dis-rank-grid--sub { margin-top: -2px; }
 
 .dis-rank-box {
     width: 32px;
@@ -445,6 +377,7 @@ html, body {
     font-size: 14px;
     font-weight: 700;
     color: var(--text-muted);
+    font-family: var(--font-mono);
 }
 
 .dis-rank-box--occupied {
@@ -464,10 +397,10 @@ html, body {
     text-align: center;
     font-size: 9px;
     color: var(--text-muted);
+    font-family: var(--font-mono);
 }
 
 /* ── Cycle donut ─────────────────────────────────────────────────────────── */
-
 .dis-cycle-status {
     display: flex;
     gap: 12px;
@@ -475,11 +408,7 @@ html, body {
     margin-top: 4px;
 }
 
-.dis-donut {
-    width: 64px;
-    height: 64px;
-    flex-shrink: 0;
-}
+.dis-donut { width: 64px; height: 64px; flex-shrink: 0; }
 
 .dis-donut__big {
     font-family: var(--font-mono);
@@ -521,6 +450,7 @@ html, body {
     font-size: 10px;
     font-weight: 700;
     color: var(--text-muted);
+    font-family: var(--font-mono);
 }
 
 .dis-cycle-legend__item--active {
@@ -529,22 +459,7 @@ html, body {
     color: var(--cyan);
 }
 
-.dis-cycle-status__label {
-    font-size: 8px;
-    letter-spacing: 1.5px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
-.dis-cycle-id-label {
-    font-size: 8px;
-    letter-spacing: 1px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
 /* ── Log entries ─────────────────────────────────────────────────────────── */
-
 .dis-log-entry {
     display: grid;
     grid-template-columns: 36px 90px 1fr;
@@ -553,23 +468,22 @@ html, body {
     border-bottom: 1px solid var(--border);
     align-items: baseline;
     font-size: 10px;
+    font-family: var(--font-mono);
 }
 
 .dis-log-entry:last-child { border-bottom: none; }
 
-.dis-log__time { color: var(--text-muted); }
+.dis-log__time   { color: var(--text-muted) !important; }
+.dis-log__type   { font-weight: 700; color: var(--text-muted); font-size: 9px !important; letter-spacing: 0.5px; }
+.dis-log__detail { color: var(--text) !important; font-size: 10px !important; }
 
-.dis-log__type              { font-weight: 700; color: var(--text-muted); font-size: 9px; letter-spacing: 0.5px; }
-.dis-log__type--state       { color: var(--cyan); }
-.dis-log__type--output      { color: var(--yellow); }
-.dis-log__type--entry       { color: var(--green); }
-.dis-log__type--exec        { color: var(--orange); }
-.dis-log__type--exit        { color: var(--red); }
-
-.dis-log__detail { color: var(--text); font-size: 10px; }
+.dis-log__type--state  { color: var(--cyan) !important; }
+.dis-log__type--output { color: var(--yellow) !important; }
+.dis-log__type--entry  { color: var(--green) !important; }
+.dis-log__type--exec   { color: var(--orange) !important; }
+.dis-log__type--exit   { color: var(--red) !important; }
 
 /* ── Stat rows ───────────────────────────────────────────────────────────── */
-
 .dis-stat-row {
     display: flex;
     align-items: center;
@@ -577,15 +491,12 @@ html, body {
     padding: 4px 0;
     border-bottom: 1px solid var(--border);
     font-size: 10px;
+    font-family: var(--font-mono);
 }
 
 .dis-stat-row:last-child { border-bottom: none; }
 
-.dis-stat__label { color: var(--text-muted); }
-.dis-stat__value { color: var(--text-strong); font-weight: 700; font-size: 12px; }
-
-/* ── Signals columns ─────────────────────────────────────────────────────── */
-
+/* ── Signal columns ─────────────────────────────────────────────────────── */
 .dis-signals-col {
     flex: 1;
     padding: 8px 10px;
@@ -599,10 +510,6 @@ html, body {
 .dis-signals-col:last-child { border-right: none; }
 
 .dis-signals-col__header {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: var(--text-muted);
     display: flex;
     align-items: center;
     gap: 4px;
@@ -611,36 +518,11 @@ html, body {
     flex-shrink: 0;
 }
 
-.dis-arrow-icon { color: var(--cyan); }
-
 .dis-signal-row {
     display: flex;
     align-items: center;
     gap: 6px;
     padding: 3px 0;
-}
-
-.dis-signal__asset {
-    color: var(--cyan);
-    font-weight: 700;
-    min-width: 50px;
-    font-size: 11px;
-}
-
-.dis-signal__chart {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    flex: 1;
-}
-
-.dis-signal__chart-label {
-    font-size: 8px;
-    color: var(--text-muted);
-    letter-spacing: 0.3px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .dis-signals-col__footer {
@@ -652,69 +534,50 @@ html, body {
     gap: 6px;
     font-size: 9px;
     color: var(--text-muted);
+    font-family: var(--font-mono);
 }
 
-.dis-risk-badges {
-    display: flex;
-    gap: 3px;
-    flex-wrap: wrap;
-}
+.dis-risk-badges { display: flex; gap: 3px; flex-wrap: wrap; }
 
-/* ── Footer ──────────────────────────────────────────────────────────────── */
-
+/* ── Footer bar ──────────────────────────────────────────────────────────── */
 .dis-footer {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 5px 10px;
-    background: var(--bg-panel-hd);
-    border: 1px solid var(--border);
-    border-radius: var(--panel-radius);
-    flex-shrink: 0;
-    font-size: 10px;
-    overflow: hidden;
+    padding: 5px 12px !important;
+    background: var(--bg-panel-hd) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--panel-radius) !important;
+    flex-shrink: 0 !important;
+    font-size: 10px !important;
+    font-family: var(--font-mono) !important;
+    margin: 0 !important;
 }
 
-.dis-footer__label {
-    font-weight: 700;
-    letter-spacing: 1px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    flex-shrink: 0;
-}
-
-.dis-footer__item {
-    color: var(--text-muted);
-    white-space: nowrap;
-}
-
-.dis-footer__item strong {
-    color: var(--text-strong);
-    font-size: 11px;
-}
-
-.dis-footer__sep {
-    color: var(--border);
-}
+.dis-sep { color: var(--border); }
 
 /* ── Scrollbar ───────────────────────────────────────────────────────────── */
-
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-/* ── Pulse animation for live badges ────────────────────────────────────── */
-
+/* ── Pulse animation ────────────────────────────────────────────────────── */
 @keyframes pulse-border {
     0%   { box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.4); }
     70%  { box-shadow: 0 0 0 4px rgba(0, 200, 255, 0); }
     100% { box-shadow: 0 0 0 0 rgba(0, 200, 255, 0); }
 }
 
-.dis-badge--cyan.dis-badge--arrow-up {
+.rz-badge.rz-badge-info {
     animation: pulse-border 2s ease-in-out infinite;
 }
 
-/* ── Radzen overrides ────────────────────────────────────────────────────── */
+/* Disable pulse for non-directional badges */
+.rz-badge.rz-badge-info.dis-badge-xs { animation: none; }
 
-.rz-body { background: var(--bg-base) !important; }
+/* ── Radzen global dark overrides ────────────────────────────────────────── */
+body .rz-body,
+.rz-application { background: var(--bg-base) !important; }
+
+/* Kill Radzen card box-shadow and default bg in panel context */
+.dis-panel .rz-card {
+    box-shadow: none !important;
+    background: transparent !important;
+}
