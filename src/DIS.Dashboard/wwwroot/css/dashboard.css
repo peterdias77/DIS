@@ -1,14 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   DIS DASHBOARD — Unified Dark Theme
-   Strategy: override Radzen's CSS custom properties at :root so every
-   Radzen component (RadzenCard, RadzenDataGrid, RadzenBadge, RadzenText)
-   inherits our palette automatically, without per-component !important wars.
-   Then patch the few elements that still escape the token system.
+   DIS DASHBOARD — Unified Dark Theme (READABLE FONT SIZES)
 ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── STEP 1: Override Radzen's injected design tokens ───────────────────────
-   Radzen Dark injects these into :root via its stylesheet. We redefine them
-   here (dashboard.css loads after Radzen) so our values win everywhere.     */
 :root {
     /* Core backgrounds */
     --rz-base-background-color:         #0d1117;
@@ -43,7 +36,7 @@
     --rz-info:                          #00c8ff;
     --rz-secondary:                     #4a6278;
 
-    /* Shadows — kill all of them */
+    /* Shadows — kill all */
     --rz-shadow:                        none;
     --rz-card-shadow:                   none;
     --rz-shadow-1:                      none;
@@ -84,12 +77,11 @@ html, body {
     background: var(--bg-base) !important;
     color: var(--text);
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 14px;       /* UP from 11px */
     height: 100%;
     overflow: hidden;
 }
 
-/* Kill Radzen body-level backgrounds */
 .rz-body,
 .rz-application,
 body .rz-body { background: var(--bg-base) !important; }
@@ -106,7 +98,7 @@ body .rz-body { background: var(--bg-base) !important; }
 
 /* ── STEP 4: Header ─────────────────────────────────────────────────────── */
 .dis-header {
-    padding: 6px 12px !important;
+    padding: 6px 14px !important;
     background: var(--bg-panel-hd) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--panel-radius) !important;
@@ -116,7 +108,7 @@ body .rz-body { background: var(--bg-base) !important; }
 }
 
 .dis-brand {
-    font-size: 13px !important;
+    font-size: 15px !important;    /* UP from 13px */
     font-weight: 700 !important;
     letter-spacing: 2px !important;
     color: var(--text-strong) !important;
@@ -128,14 +120,14 @@ body .rz-body { background: var(--bg-base) !important; }
     background: rgba(0, 200, 255, 0.12) !important;
     color: var(--cyan) !important;
     border: 1px solid var(--cyan-dim) !important;
-    font-size: 10px !important;
+    font-size: 12px !important;    /* UP from 10px */
     letter-spacing: 1.5px !important;
     font-family: var(--font-mono) !important;
     box-shadow: none !important;
 }
 
 .dis-clock-time {
-    font-size: 14px !important;
+    font-size: 16px !important;    /* UP from 14px */
     font-weight: 700 !important;
     color: var(--cyan) !important;
     letter-spacing: 1px !important;
@@ -154,9 +146,7 @@ body .rz-body { background: var(--bg-base) !important; }
 .dis-grid--mid { grid-template-columns: 1.8fr 1fr 1fr; flex: 1.1; }
 .dis-grid--bot { grid-template-columns: 1fr 1fr 1fr;   flex: 0.9; }
 
-/* ── STEP 6: Panel / RadzenCard ─────────────────────────────────────────────
-   RadzenCard generates: background, box-shadow, border-radius
-   We override ALL of them explicitly.                                        */
+/* ── STEP 6: Panel / RadzenCard ─────────────────────────────────────────────*/
 .dis-panel,
 .dis-panel.rz-card {
     background: var(--bg-panel) !important;
@@ -172,7 +162,6 @@ body .rz-body { background: var(--bg-base) !important; }
 
 .dis-panel.h-100 { height: 100%; }
 
-/* Inner rz-card wrapper that Radzen sometimes adds */
 .dis-panel .rz-card {
     background: transparent !important;
     box-shadow: none !important;
@@ -183,12 +172,12 @@ body .rz-body { background: var(--bg-base) !important; }
 .dis-panel__header {
     background: var(--bg-panel-hd) !important;
     border-bottom: 1px solid var(--border);
-    padding: 5px 10px;
+    padding: 6px 12px;     /* UP from 5px 10px */
     flex-shrink: 0;
 }
 
 .dis-panel-title {
-    font-size: 10px !important;
+    font-size: 12px !important;    /* UP from 10px */
     font-weight: 700 !important;
     letter-spacing: 1.5px !important;
     color: var(--text-muted) !important;
@@ -197,10 +186,10 @@ body .rz-body { background: var(--bg-base) !important; }
 }
 
 .dis-panel__body {
-    padding: 8px 10px;
+    padding: 10px 12px;    /* UP from 8px 10px */
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;              /* UP from 5px */
     overflow: hidden;
     flex: 1;
     min-height: 0;
@@ -225,25 +214,24 @@ body .rz-body { background: var(--bg-base) !important; }
 .dis-kv-row {
     display: flex;
     align-items: center;
-    gap: 6px;
-    min-height: 18px;
+    gap: 8px;              /* UP from 6px */
+    min-height: 22px;      /* UP from 18px */
 }
 
 .dis-label {
     color: var(--text-muted) !important;
-    font-size: 10px !important;
+    font-size: 12px !important;    /* UP from 10px */
     letter-spacing: 0.5px !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
     font-family: var(--font-mono) !important;
 }
 
-/* General RadzenText inside panels */
 .dis-panel .rz-text { font-family: var(--font-mono) !important; }
 
 /* ── STEP 8: Badges ─────────────────────────────────────────────────────── */
-.dis-badge-sm.rz-badge { font-size: 9px !important; padding: 1px 6px !important; }
-.dis-badge-xs.rz-badge { font-size: 9px !important; padding: 0 4px !important; }
+.dis-badge-sm.rz-badge { font-size: 12px !important; padding: 2px 8px !important; }  /* UP from 9px */
+.dis-badge-xs.rz-badge { font-size: 11px !important; padding: 1px 6px !important; }  /* UP from 9px */
 
 .dis-badge-sm.rz-badge,
 .dis-badge-xs.rz-badge {
@@ -256,7 +244,6 @@ body .rz-body { background: var(--bg-base) !important; }
     box-shadow: none !important;
 }
 
-/* Semantic badge colours — full override */
 .rz-badge.rz-badge-success  {
     background: #001f0e !important;
     color: var(--green) !important;
@@ -284,71 +271,62 @@ body .rz-body { background: var(--bg-base) !important; }
 }
 
 /* ── STEP 9: RadzenDataGrid (Active Trades) ─────────────────────────────── */
-
-/* Wrapper */
 .dis-trade-grid { background: transparent !important; }
 .dis-trade-grid .rz-data-grid,
 .dis-trade-grid .rz-datatable { background: transparent !important; border: none !important; }
 
-/* Header cells */
 .dis-trade-grid .rz-column-header,
 .dis-trade-grid .rz-column-title,
 .dis-trade-grid th,
 .dis-trade-grid .rz-data-grid-header tr th {
     background: var(--bg-panel-hd) !important;
     color: var(--text-muted) !important;
-    font-size: 9px !important;
+    font-size: 12px !important;    /* UP from 9px */
     font-weight: 500 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.8px !important;
     border-bottom: 1px solid var(--border) !important;
     border-right: none !important;
     font-family: var(--font-mono) !important;
-    padding: 5px 10px !important;
+    padding: 6px 12px !important;  /* UP from 5px 10px */
 }
 
-/* Data rows */
 .dis-trade-grid td,
 .dis-trade-grid .rz-data-row td,
 .dis-trade-grid .rz-body-row td,
 .dis-trade-grid .rz-data-grid-body td {
     background: var(--bg-panel) !important;
     color: var(--text) !important;
-    font-size: 11px !important;
+    font-size: 13px !important;    /* UP from 11px */
     font-family: var(--font-mono) !important;
-    padding: 6px 10px !important;
+    padding: 7px 12px !important;  /* UP from 6px 10px */
     border-bottom: 1px solid var(--border) !important;
     border-right: none !important;
 }
 
-/* Hover */
 .dis-trade-grid .rz-data-row:hover td,
 .dis-trade-grid .rz-body-row:hover td {
     background: var(--bg-row) !important;
 }
 
-/* Alternating row override (kill Radzen zebra) */
 .dis-trade-grid .rz-data-row:nth-child(even) td,
 .dis-trade-grid .rz-body-row:nth-child(even) td {
     background: var(--bg-panel) !important;
 }
 
-/* Scrollable header bar */
 .dis-trade-grid .rz-datatable-scrollable-header,
 .dis-trade-grid .rz-data-grid-data {
     background: var(--bg-panel) !important;
 }
 
-/* Empty state */
 .dis-trade-grid .rz-empty-row td {
     background: var(--bg-panel) !important;
     color: var(--text-muted) !important;
-    font-size: 11px !important;
-    padding: 16px 10px !important;
+    font-size: 13px !important;    /* UP from 11px */
+    padding: 16px 12px !important;
     font-family: var(--font-mono) !important;
 }
 
-/* Grid outer border */
 .dis-trade-grid .rz-data-grid {
     border: none !important;
     box-shadow: none !important;
@@ -364,7 +342,7 @@ body .rz-body { background: var(--bg-base) !important; }
 
 /* ── STEP 12: Footer ─────────────────────────────────────────────────────── */
 .dis-footer {
-    padding: 5px 12px !important;
+    padding: 6px 14px !important;
     background: var(--bg-panel-hd) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--panel-radius) !important;
@@ -380,13 +358,13 @@ body .rz-body { background: var(--bg-base) !important; }
 .dis-sparkline {
     display: flex;
     align-items: flex-end;
-    gap: 1px;
-    height: 16px;
+    gap: 2px;
+    height: 18px;          /* UP from 16px */
     margin-left: auto;
 }
 
 .dis-sparkline__bar {
-    width: 3px;
+    width: 4px;            /* UP from 3px */
     border-radius: 1px 1px 0 0;
     min-height: 2px;
 }
@@ -403,8 +381,8 @@ body .rz-body { background: var(--bg-base) !important; }
 }
 
 .dis-barset__bar {
-    width: 6px;
-    height: 12px;
+    width: 7px;            /* UP from 6px */
+    height: 14px;          /* UP from 12px */
     border-radius: 1px;
     background: var(--dim);
     border: 1px solid var(--border);
@@ -418,10 +396,10 @@ body .rz-body { background: var(--bg-base) !important; }
 /* ── STEP 15: Output Diagnostics columns ─────────────────────────────────── */
 .dis-diag-col {
     flex: 1;
-    padding: 8px 10px;
+    padding: 10px 12px;    /* UP from 8px 10px */
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;              /* UP from 5px */
     border-right: 1px solid var(--border);
     background: var(--bg-panel);
 }
@@ -433,8 +411,8 @@ body .rz-body { background: var(--bg-base) !important; }
     background: rgba(0, 200, 255, 0.06);
     border: 1px solid var(--cyan-dim);
     color: var(--cyan);
-    font-size: 10px;
-    padding: 2px 8px;
+    font-size: 12px;       /* UP from 10px */
+    padding: 3px 10px;
     border-radius: 2px;
     font-weight: 600;
     font-family: var(--font-mono);
@@ -442,7 +420,7 @@ body .rz-body { background: var(--bg-base) !important; }
 }
 
 /* ── STEP 17: Rank strip ─────────────────────────────────────────────────── */
-.dis-rank-strip { display: flex; gap: 3px; margin-top: 2px; }
+.dis-rank-strip { display: flex; gap: 4px; margin-top: 2px; }
 
 .dis-rank-strip__slot {
     display: flex;
@@ -451,8 +429,8 @@ body .rz-body { background: var(--bg-base) !important; }
     background: var(--dim);
     border: 1px solid var(--border);
     border-radius: 2px;
-    padding: 2px 6px;
-    min-width: 28px;
+    padding: 3px 8px;      /* UP from 2px 6px */
+    min-width: 34px;       /* UP from 28px */
 }
 
 .dis-rank-strip__slot--active {
@@ -461,7 +439,7 @@ body .rz-body { background: var(--bg-base) !important; }
 }
 
 .dis-rank-strip__num {
-    font-size: 13px;
+    font-size: 15px;       /* UP from 13px */
     font-weight: 700;
     color: var(--text);
     font-family: var(--font-mono);
@@ -470,25 +448,25 @@ body .rz-body { background: var(--bg-base) !important; }
 .dis-rank-strip__slot--active .dis-rank-strip__num { color: var(--cyan); }
 
 .dis-rank-strip__sub {
-    font-size: 9px;
+    font-size: 11px;       /* UP from 9px */
     color: var(--text-muted);
     font-family: var(--font-mono);
 }
 
 /* ── STEP 18: Rank boxes (diagnostics) ───────────────────────────────────── */
-.dis-rank-grid { display: flex; gap: 4px; }
+.dis-rank-grid { display: flex; gap: 5px; }
 .dis-rank-grid--sub { margin-top: -2px; }
 
 .dis-rank-box {
-    width: 32px;
-    height: 32px;
+    width: 38px;           /* UP from 32px */
+    height: 38px;          /* UP from 32px */
     border-radius: 3px;
     background: var(--dim);
     border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 17px;       /* UP from 14px */
     font-weight: 700;
     color: var(--text-muted);
     font-family: var(--font-mono);
@@ -507,27 +485,27 @@ body .rz-body { background: var(--bg-base) !important; }
 }
 
 .dis-rank-sub {
-    width: 32px;
+    width: 38px;           /* UP from 32px */
     text-align: center;
-    font-size: 9px;
+    font-size: 11px;       /* UP from 9px */
     color: var(--text-muted);
     font-family: var(--font-mono);
 }
 
 /* ── STEP 19: Cycle donut ────────────────────────────────────────────────── */
-.dis-cycle-status { display: flex; gap: 12px; align-items: flex-start; margin-top: 4px; }
-.dis-donut { width: 64px; height: 64px; flex-shrink: 0; }
+.dis-cycle-status { display: flex; gap: 14px; align-items: flex-start; margin-top: 4px; }
+.dis-donut { width: 72px; height: 72px; flex-shrink: 0; }  /* UP from 64px */
 
 .dis-donut__big {
     font-family: var(--font-mono);
-    font-size: 20px;
+    font-size: 22px;       /* UP from 20px */
     font-weight: 700;
     fill: var(--text-strong);
 }
 
 .dis-donut__small {
     font-family: var(--font-mono);
-    font-size: 7px;
+    font-size: 9px;        /* UP from 7px */
     fill: var(--text-muted);
     letter-spacing: 1px;
 }
@@ -535,7 +513,7 @@ body .rz-body { background: var(--bg-base) !important; }
 .dis-cycle-status__legend {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
     flex: 1;
 }
 
@@ -544,15 +522,15 @@ body .rz-body { background: var(--bg-base) !important; }
 
 .dis-cycle-legend__item,
 .dis-cycle-id__item {
-    width: 20px;
-    height: 20px;
+    width: 24px;           /* UP from 20px */
+    height: 24px;          /* UP from 20px */
     border-radius: 3px;
     background: var(--dim);
     border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 10px;
+    font-size: 12px;       /* UP from 10px */
     font-weight: 700;
     color: var(--text-muted);
     font-family: var(--font-mono);
@@ -567,20 +545,20 @@ body .rz-body { background: var(--bg-base) !important; }
 /* ── STEP 20: Log entries ────────────────────────────────────────────────── */
 .dis-log-entry {
     display: grid;
-    grid-template-columns: 36px 90px 1fr;
+    grid-template-columns: 44px 110px 1fr;  /* UP from 36px 90px */
     gap: 6px;
-    padding: 4px 0;
+    padding: 5px 0;        /* UP from 4px 0 */
     border-bottom: 1px solid var(--border);
     align-items: baseline;
-    font-size: 10px;
+    font-size: 12px;       /* UP from 10px */
     font-family: var(--font-mono);
 }
 
 .dis-log-entry:last-child { border-bottom: none; }
 
-.dis-log__time   { color: var(--text-muted) !important; font-family: var(--font-mono) !important; }
-.dis-log__detail { color: var(--text) !important; font-size: 10px !important; font-family: var(--font-mono) !important; }
-.dis-log__type   { font-weight: 700; color: var(--text-muted); font-size: 9px !important; letter-spacing: 0.5px; font-family: var(--font-mono) !important; }
+.dis-log__time   { color: var(--text-muted) !important; font-family: var(--font-mono) !important; font-size: 12px !important; }
+.dis-log__detail { color: var(--text) !important; font-size: 12px !important; font-family: var(--font-mono) !important; }
+.dis-log__type   { font-weight: 700; color: var(--text-muted); font-size: 11px !important; letter-spacing: 0.5px; font-family: var(--font-mono) !important; }
 
 .dis-log__type--state  { color: var(--cyan) !important; }
 .dis-log__type--output { color: var(--yellow) !important; }
@@ -593,9 +571,10 @@ body .rz-body { background: var(--bg-base) !important; }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 0;
+    padding: 5px 0;        /* UP from 4px 0 */
     border-bottom: 1px solid var(--border);
     font-family: var(--font-mono);
+    font-size: 13px;       /* added */
 }
 
 .dis-stat-row:last-child { border-bottom: none; }
@@ -603,10 +582,10 @@ body .rz-body { background: var(--bg-base) !important; }
 /* ── STEP 22: Signal columns ─────────────────────────────────────────────── */
 .dis-signals-col {
     flex: 1;
-    padding: 8px 10px;
+    padding: 10px 12px;    /* UP from 8px 10px */
     display: flex;
     flex-direction: column;
-    gap: 5px;
+    gap: 6px;              /* UP from 5px */
     border-right: 1px solid var(--border);
     overflow: hidden;
     background: var(--bg-panel);
@@ -617,8 +596,8 @@ body .rz-body { background: var(--bg-base) !important; }
 .dis-signals-col__header {
     display: flex;
     align-items: center;
-    gap: 4px;
-    padding-bottom: 4px;
+    gap: 5px;
+    padding-bottom: 5px;
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
 }
@@ -626,46 +605,53 @@ body .rz-body { background: var(--bg-base) !important; }
 .dis-signal-row {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 3px 0;
+    gap: 8px;              /* UP from 6px */
+    padding: 4px 0;        /* UP from 3px 0 */
 }
 
 .dis-signals-col__footer {
     margin-top: auto;
     border-top: 1px solid var(--border);
-    padding-top: 5px;
+    padding-top: 6px;
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 9px;
+    gap: 8px;
+    font-size: 11px;       /* UP from 9px */
     color: var(--text-muted);
     font-family: var(--font-mono);
 }
 
-.dis-risk-badges { display: flex; gap: 3px; flex-wrap: wrap; }
+.dis-risk-badges { display: flex; gap: 4px; flex-wrap: wrap; }
 
 /* ── STEP 23: Scrollbars ─────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-/* ── STEP 24: Pulse animation on Info badges ─────────────────────────────── */
+/* ── STEP 24: Pulse animation ────────────────────────────────────────────── */
 @keyframes pulse-cyan {
     0%   { box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.35); }
     70%  { box-shadow: 0 0 0 4px rgba(0, 200, 255, 0); }
     100% { box-shadow: 0 0 0 0 rgba(0, 200, 255, 0); }
 }
-
-/* Only pulse directional / live badges, not every info badge */
 .dis-badge-live.rz-badge { animation: pulse-cyan 2s ease-in-out infinite; }
 
 /* ── STEP 25: RadzenIcon colour ───────────────────────────────────────────── */
 .rz-icon { font-family: 'Material Icons' !important; }
 
-/* ── ADDENDUM: Deep RadzenDataGrid element overrides ─────────────────────
-   Radzen renders several wrapper divs inside the grid that carry their own
-   background. Target them all to ensure full panel-colour consistency.     */
+/* ── Radzen Text overrides — ensure our sizes aren't overridden ──────────── */
+.dis-panel .rz-text-caption  { font-size: 12px !important; font-family: var(--font-mono) !important; }
+.dis-panel .rz-text-body2    { font-size: 13px !important; font-family: var(--font-mono) !important; }
+.dis-panel .rz-text-body1    { font-size: 14px !important; font-family: var(--font-mono) !important; }
+.dis-panel .rz-text-subtitle2 { font-size: 13px !important; font-family: var(--font-mono) !important; }
+.dis-panel .rz-text-h6       { font-size: 14px !important; font-family: var(--font-mono) !important; }
+.dis-panel .rz-text-overline  { font-size: 12px !important; font-family: var(--font-mono) !important; }
 
+/* Footer text */
+.dis-footer .rz-text-body2   { font-size: 13px !important; font-family: var(--font-mono) !important; }
+.dis-footer .rz-text-overline { font-size: 12px !important; font-family: var(--font-mono) !important; }
+
+/* ── Deep RadzenDataGrid element overrides ───────────────────────────────── */
 .dis-trade-grid .rz-data-grid-data,
 .dis-trade-grid .rz-datatable-scrollable-body,
 .dis-trade-grid .rz-datatable-scrollable-header-box,
@@ -677,33 +663,28 @@ body .rz-body { background: var(--bg-base) !important; }
     background: var(--bg-panel) !important;
 }
 
-/* Column header inner spans */
 .dis-trade-grid .rz-column-header-content,
 .dis-trade-grid .rz-sortable-column-header {
     color: var(--text-muted) !important;
-    font-size: 9px !important;
+    font-size: 12px !important;    /* UP from 9px */
     font-family: var(--font-mono) !important;
     letter-spacing: 0.8px !important;
     text-transform: uppercase !important;
 }
 
-/* Remove all Radzen grid borders except our bottom row border */
 .dis-trade-grid table,
 .dis-trade-grid .rz-grid-table { border-collapse: collapse !important; }
 
 .dis-trade-grid th { border-top: none !important; border-left: none !important; border-right: none !important; }
 .dis-trade-grid td { border-top: none !important; border-left: none !important; border-right: none !important; }
 
-/* ── Ensure RadzenStack / RadzenRow never bleed a white background ─────── */
 .rz-stack,
 .rz-row,
 .rz-col { background: transparent !important; }
 
-/* ── Make dis-panel__body bg explicit so no Radzen token bleeds in ──────── */
 .dis-panel__body,
 .dis-panel__body--cols,
 .dis-panel__body--rank,
 .dis-panel__body--signals { background: var(--bg-panel) !important; }
 
-/* ── app.css body rule guard — force our bg over any Radzen body injection */
 body { background-color: var(--bg-base) !important; }
