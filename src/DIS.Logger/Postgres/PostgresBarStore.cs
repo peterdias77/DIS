@@ -115,54 +115,58 @@ public sealed class PostgresBarStore : IAsyncDisposable
 
         await using var conn = await _ds.OpenConnectionAsync(ct);
 
-        // ── Step 1: create temp table ─────────────────────────────────────────
-        await using (var cmd = new NpgsqlCommand("""
-            CREATE TEMP TABLE tmp_ohlc_bars (
-                symbol    TEXT,
-                timeframe TEXT,
-                bar_time  TIMESTAMPTZ,
-                open      NUMERIC(20,8),
-                high      NUMERIC(20,8),
-                low       NUMERIC(20,8),
-                close     NUMERIC(20,8),
-                volume    BIGINT
-            ) ON COMMIT DROP;
-            """, conn))
-        {
-            await cmd.ExecuteNonQueryAsync(ct);
-        }
+        // ── Begin explicit transaction ────────────────────────────────────────
+        await using var transaction = await conn.BeginTransactionAsync(ct);
 
-        // ── Step 2: COPY into temp ────────────────────────────────────────────
-        await using (var writer = await conn.BeginBinaryImportAsync(
-            "COPY tmp_ohlc_bars (symbol, timeframe, bar_time, open, high, low, close, volume) FROM STDIN (FORMAT BINARY)",
-            ct))
+        try
         {
-            foreach (var bar in bars)
+            // ── Step 1: create temp table ─────────────────────────────────────
+            await using (var cmd = new NpgsqlCommand(
+                "CREATE TEMP TABLE IF NOT EXISTS tmp_ohlc_bars (symbol TEXT, timeframe TEXT, bar_time TIMESTAMPTZ, open NUMERIC(20,8), high NUMERIC(20,8), low NUMERIC(20,8), close NUMERIC(20,8), volume BIGINT) ON COMMIT DROP",
+                conn))
             {
-                await writer.StartRowAsync(ct);
-                await writer.WriteAsync(bar.Symbol,                NpgsqlDbType.Text,        ct);
-                await writer.WriteAsync(bar.Timeframe,             NpgsqlDbType.Text,        ct);
-                await writer.WriteAsync(bar.Time.ToUniversalTime(), NpgsqlDbType.TimestampTz, ct);
-                await writer.WriteAsync(bar.Open,                  NpgsqlDbType.Numeric,     ct);
-                await writer.WriteAsync(bar.High,                  NpgsqlDbType.Numeric,     ct);
-                await writer.WriteAsync(bar.Low,                   NpgsqlDbType.Numeric,     ct);
-                await writer.WriteAsync(bar.Close,                 NpgsqlDbType.Numeric,     ct);
-                await writer.WriteAsync(bar.Volume,                NpgsqlDbType.Bigint,      ct);
+                await cmd.ExecuteNonQueryAsync(ct);
             }
-            await writer.CompleteAsync(ct);
+
+            // ── Step 2: COPY into temp ────────────────────────────────────────
+            await using (var writer = await conn.BeginBinaryImportAsync(
+                "COPY tmp_ohlc_bars (symbol, timeframe, bar_time, open, high, low, close, volume) FROM STDIN (FORMAT BINARY)",
+                ct))
+            {
+                foreach (var bar in bars)
+                {
+                    await writer.StartRowAsync(ct);
+                    await writer.WriteAsync(bar.Symbol,                NpgsqlDbType.Text,        ct);
+                    await writer.WriteAsync(bar.Timeframe,             NpgsqlDbType.Text,        ct);
+                    await writer.WriteAsync(bar.Time.ToUniversalTime(), NpgsqlDbType.TimestampTz, ct);
+                    await writer.WriteAsync(bar.Open,                  NpgsqlDbType.Numeric,     ct);
+                    await writer.WriteAsync(bar.High,                  NpgsqlDbType.Numeric,     ct);
+                    await writer.WriteAsync(bar.Low,                   NpgsqlDbType.Numeric,     ct);
+                    await writer.WriteAsync(bar.Close,                 NpgsqlDbType.Numeric,     ct);
+                    await writer.WriteAsync(bar.Volume,                NpgsqlDbType.Bigint,      ct);
+                }
+                await writer.CompleteAsync(ct);
+            }
+
+            // ── Step 3: dedup insert into permanent table ─────────────────────
+            await using var insertCmd = new NpgsqlCommand("""
+                INSERT INTO dis.ohlc_bars
+                    (symbol, timeframe, bar_time, open, high, low, close, volume)
+                SELECT symbol, timeframe, bar_time, open, high, low, close, volume
+                FROM   tmp_ohlc_bars
+                ON CONFLICT (symbol, timeframe, bar_time) DO NOTHING;
+                """, conn);
+
+            int inserted = await insertCmd.ExecuteNonQueryAsync(ct);
+            
+            await transaction.CommitAsync(ct);
+            return inserted;
         }
-
-        // ── Step 3: dedup insert into permanent table ─────────────────────────
-        await using var insertCmd = new NpgsqlCommand("""
-            INSERT INTO dis.ohlc_bars
-                (symbol, timeframe, bar_time, open, high, low, close, volume)
-            SELECT symbol, timeframe, bar_time, open, high, low, close, volume
-            FROM   tmp_ohlc_bars
-            ON CONFLICT (symbol, timeframe, bar_time) DO NOTHING;
-            """, conn);
-
-        int inserted = await insertCmd.ExecuteNonQueryAsync(ct);
-        return inserted;
+        catch
+        {
+            await transaction.RollbackAsync(ct);
+            throw;
+        }
     }
 
     // ── Read — recent bars ────────────────────────────────────────────────────

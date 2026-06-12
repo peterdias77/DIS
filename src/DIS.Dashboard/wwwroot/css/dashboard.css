@@ -2,72 +2,70 @@
    DIS DASHBOARD — Unified Dark Theme (READABLE FONT SIZES)
 ═══════════════════════════════════════════════════════════════════════════ */
 
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap');
+
 :root {
     /* Core backgrounds */
-    --rz-base-background-color:         #0d1117;
-    --rz-secondary-background-color:    #0a0e14;
-    --rz-card-background-color:         #0d1117;
-    --rz-panel-background-color:        #0d1117;
-    --rz-datatable-background-color:    #0d1117;
-    --rz-sidebar-background-color:      #080b0f;
-
+    --rz-base-background-color: #0d1117;
+    --rz-secondary-background-color: #0a0e14;
+    --rz-card-background-color: #0d1117;
+    --rz-panel-background-color: #0d1117;
+    --rz-datatable-background-color: #0d1117;
+    --rz-sidebar-background-color: #080b0f;
     /* Text */
-    --rz-text-color:                    #c9d1d9;
-    --rz-text-disabled-color:           #4a6278;
-    --rz-text-title-color:              #f0f6fc;
-    --rz-text-contrast-color:           #f0f6fc;
-
+    --rz-text-color: #c9d1d9;
+    --rz-text-disabled-color: #4a6278;
+    --rz-text-title-color: #f0f6fc;
+    --rz-text-contrast-color: #f0f6fc;
     /* Borders */
-    --rz-border-radius:                 4px;
-    --rz-border-radius-sm:              2px;
-    --rz-border-disabled-color:         #1a2332;
-    --rz-grid-border-color:             #1a2332;
-
+    --rz-border-radius: 4px;
+    --rz-border-radius-sm: 2px;
+    --rz-border-disabled-color: #1a2332;
+    --rz-grid-border-color: #1a2332;
     /* Accent / semantic colours */
-    --rz-primary:                       #00c8ff;
-    --rz-primary-light:                 rgba(0, 200, 255, 0.12);
-    --rz-primary-lighter:               rgba(0, 200, 255, 0.06);
-    --rz-success:                       #00e676;
-    --rz-success-light:                 rgba(0, 230, 118, 0.12);
-    --rz-warning:                       #ffd600;
-    --rz-warning-light:                 rgba(255, 214, 0, 0.12);
-    --rz-danger:                        #ff3d5a;
-    --rz-danger-light:                  rgba(255, 61, 90, 0.12);
-    --rz-info:                          #00c8ff;
-    --rz-secondary:                     #4a6278;
-
+    --rz-primary: #00c8ff;
+    --rz-primary-light: rgba(0, 200, 255, 0.12);
+    --rz-primary-lighter: rgba(0, 200, 255, 0.06);
+    --rz-success: #00e676;
+    --rz-success-light: rgba(0, 230, 118, 0.12);
+    --rz-warning: #ffd600;
+    --rz-warning-light: rgba(255, 214, 0, 0.12);
+    --rz-danger: #ff3d5a;
+    --rz-danger-light: rgba(255, 61, 90, 0.12);
+    --rz-info: #00c8ff;
+    --rz-secondary: #4a6278;
     /* Shadows — kill all */
-    --rz-shadow:                        none;
-    --rz-card-shadow:                   none;
-    --rz-shadow-1:                      none;
-    --rz-shadow-2:                      none;
-    --rz-shadow-3:                      none;
-
+    --rz-shadow: none;
+    --rz-card-shadow: none;
+    --rz-shadow-1: none;
+    --rz-shadow-2: none;
+    --rz-shadow-3: none;
     /* DataGrid row states */
-    --rz-datatable-row-hover-background-color:     #111820;
-    --rz-datatable-row-selected-background-color:  rgba(0, 200, 255, 0.08);
-    --rz-datatable-row-even-background-color:      #0d1117;
-    --rz-datatable-row-odd-background-color:       #0d1117;
-
+    --rz-datatable-row-hover-background-color: #111820;
+    --rz-datatable-row-selected-background-color: rgba(0, 200, 255, 0.08);
+    --rz-datatable-row-even-background-color: #0d1117;
+    --rz-datatable-row-odd-background-color: #0d1117;
     /* ── DIS-specific aliases ── */
-    --bg-base:      #080b0f;
-    --bg-panel:     #0d1117;
-    --bg-panel-hd:  #0a0e14;
-    --bg-row:       #111820;
-    --border:       #1a2332;
-    --cyan:         #00c8ff;
-    --cyan-dim:     #006a8a;
-    --green:        #00e676;
-    --yellow:       #ffd600;
-    --orange:       #ff9100;
-    --red:          #ff3d5a;
-    --dim:          #131c27;
-    --text:         #c9d1d9;
-    --text-muted:   #4a6278;
-    --text-strong:  #f0f6fc;
-    --font-mono:    'Courier New', 'Lucida Console', monospace;
+    --bg-base: #080b0f;
+    --bg-panel: #0d1117;
+    --bg-panel-hd: #0a0e14;
+    --bg-row: #111820;
+    --border: #1a2332;
+    --cyan: #00c8ff;
+    --cyan-dim: #006a8a;
+    --green: #00e676;
+    --yellow: #ffd600;
+    --orange: #ff9100;
+    --red: #ff3d5a;
+    --dim: #131c27;
+    --text: #c9d1d9;
+    --text-muted: #4a6278;
+    --text-strong: #f0f6fc;
+    --font-sans: 'Source Sans Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'DM Mono', 'SFMono-Regular', Menlo, monospace;
     --panel-radius: 4px;
-    --gap:          6px;
+    --gap: 6px;
 }
 
 /* ── STEP 2: Base document ──────────────────────────────────────────────── */
@@ -76,7 +74,7 @@
 html, body {
     background: var(--bg-base) !important;
     color: var(--text);
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 14px;       /* UP from 11px */
     height: 100%;
     overflow: hidden;
@@ -113,7 +111,7 @@ body .rz-body { background: var(--bg-base) !important; }
     letter-spacing: 2px !important;
     color: var(--text-strong) !important;
     text-transform: uppercase;
-    font-family: var(--font-mono) !important;
+    font-family: var(--font-sans) !important;
 }
 
 .dis-header-badge.rz-badge {
@@ -219,15 +217,15 @@ body .rz-body { background: var(--bg-base) !important; }
 }
 
 .dis-label {
-    color: var(--text-muted) !important;
+    color: var(--text) !important;
     font-size: 12px !important;    /* UP from 10px */
     letter-spacing: 0.5px !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
-    font-family: var(--font-mono) !important;
+    font-family: var(--font-sans) !important;
 }
 
-.dis-panel .rz-text { font-family: var(--font-mono) !important; }
+.dis-panel .rz-text { font-family: var(--font-sans) !important; }
 
 /* ── STEP 8: Badges ─────────────────────────────────────────────────────── */
 .dis-badge-sm.rz-badge { font-size: 12px !important; padding: 2px 8px !important; }  /* UP from 9px */

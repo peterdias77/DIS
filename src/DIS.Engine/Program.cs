@@ -45,10 +45,16 @@ builder.Logging.AddConsole();
 builder.Services.AddSignalR();
 
 // ── PostgreSQL connection string ──────────────────────────────────────────────
-var pgConn = Environment.GetEnvironmentVariable("DIS_PG_CONN")
-    ?? throw new InvalidOperationException(
-        "DIS_PG_CONN environment variable is not set. " +
-        "Example: Host=localhost;Port=5432;Database=dis;Username=dis;Password=secret");
+var pgConn = Environment.GetEnvironmentVariable("DIS_PG_CONN");
+
+if (string.IsNullOrEmpty(pgConn))
+{
+    // Fallback to configuration file
+    pgConn = builder.Configuration.GetConnectionString("Postgres")
+        ?? throw new InvalidOperationException(
+            "DIS_PG_CONN environment variable or 'Postgres' connection string is not set. " +
+            "Example: Host=localhost;Port=5432;Database=dis;Username=dis;Password=secret");
+}
 
 // ── PostgreSQL log writer ─────────────────────────────────────────────────────
 builder.Services.AddSingleton<PostgresLogWriter>(_ =>
