@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>DIS — Decision Intelligence System</title>
     <base href="/" />
+    @* Radzen dark theme loads first so our dashboard.css :root overrides win *@
+    <RadzenTheme Theme="dark" />
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="css/dashboard.css" />
     <HeadOutlet />
-    <RadzenTheme Theme="dark" />
 </head>
 <body>
     <Routes />

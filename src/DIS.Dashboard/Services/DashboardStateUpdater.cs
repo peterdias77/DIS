@@ -8,44 +8,44 @@ using Microsoft.Extensions.Logging;
 namespace DIS.Dashboard.Services;
 
 /// <summary>
-/// The bridge between live data and the UI.
+/// The bridge between live data and the UI. No panel or page touches
+/// the hub or the database directly — everything flows through here.
 ///
-/// Two data sources feed DashboardState:
+/// Two data sources:
 ///
-///   1. STARTUP — PostgreSQL history (via ILogReader)
-///      Reads the most recent log entries on startup and replays them
-///      so the dashboard is populated immediately, even before any live
-///      events arrive from the engine.
+///   1. STARTUP — PostgreSQL history (ILogReader)
+///      Replays recent log entries oldest→newest so the dashboard is
+///      fully populated before any live event arrives.
 ///
-///   2. LIVE — SignalR hub events (via DashboardHubClient)
-///      Subscribes to OnLogEntry and OnFeedHealth. Every incoming event
-///      is parsed and mapped to the correct DashboardState field via
-///      IDashboardStateService.Update().
+///   2. LIVE — SignalR hub events (DashboardHubClient)
+///      OnLogEntry  → ApplyEntry() → IDashboardStateService.Update()
+///      OnFeedHealth → ignored here (panels subscribe directly if needed)
 ///
-/// Event → State mapping:
-///   state_change          → LogEntries list, per-state field updates (regime, volatility etc.)
-///   output_change         → structural condition, direction bias, volatility env, risk env,
-///                           execution quality, crowd condition, TF alignment, behavior type
-///   orchestration_change  → trading permission, strategy, direction, confidence
-///   entry                 → EntrySignals list, active trade seeding
-///   risk                  → position size label, stop loss display
-///   execution             → (logged to LogEntries)
-///   exit                  → active trade removal / position state update, PnL
-///   feed_health           → (not shown in DashboardState panels — handled separately)
+/// Event → DashboardState mapping:
+///   state_change          → log list, regime/volatility/strength/structure fields
+///   output_change         → direction, risk env, execution quality, crowd,
+///                           TF alignment, behavior type, market regime,
+///                           trading permission
+///   orchestration_change  → trading permission, active cycle label, direction bias,
+///                           last logged (confidence), cycle id + rank strip
+///   entry                 → entry signals list, active trades, log list
+///   risk                  → position size label, stop loss display, active trade update
+///   execution             → log list, action counter
+///   exit                  → active trades, open PnL, log list
 /// </summary>
 public sealed class DashboardStateUpdater : BackgroundService
 {
-    private readonly DashboardHubClient          _hub;
-    private readonly ILogReader                  _db;
-    private readonly IDashboardStateService      _state;
+    private readonly DashboardHubClient             _hub;
+    private readonly ILogReader                     _db;
+    private readonly IDashboardStateService         _state;
     private readonly ILogger<DashboardStateUpdater> _log;
 
-    private static readonly JsonSerializerOptions _jsonOpts = new()
+    private static readonly JsonSerializerOptions JsonOpts = new()
     {
         PropertyNameCaseInsensitive = true
     };
 
-    // Track active trades in memory so we can update PnL on exit events
+    // In-memory active trade ledger — rebuilt from entry/risk/exit events
     private readonly Dictionary<string, ActiveTrade> _activeTrades = new();
 
     public DashboardStateUpdater(
@@ -62,67 +62,56 @@ public sealed class DashboardStateUpdater : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // ── Step 1: hydrate from DB history before subscribing to live events ──
+        // ── Step 1: populate from DB before subscribing to live stream ────────
         await HydrateFromHistoryAsync(stoppingToken);
 
         // ── Step 2: subscribe to live hub events ──────────────────────────────
-        _hub.OnLogEntry  += OnLogEntry;
-        _hub.OnFeedHealth += OnFeedHealth;
-
-        _log.LogInformation("DashboardStateUpdater: live event subscription active.");
+        _hub.OnLogEntry += OnLiveLogEntry;
+        _log.LogInformation("DashboardStateUpdater: live subscription active.");
 
         await Task.Delay(Timeout.Infinite, stoppingToken);
 
-        _hub.OnLogEntry   -= OnLogEntry;
-        _hub.OnFeedHealth -= OnFeedHealth;
+        _hub.OnLogEntry -= OnLiveLogEntry;
     }
 
-    // ── Startup history hydration ─────────────────────────────────────────────
+    // ── History hydration ─────────────────────────────────────────────────────
 
     private async Task HydrateFromHistoryAsync(CancellationToken ct)
     {
         try
         {
-            _log.LogInformation("DashboardStateUpdater: hydrating from DB history...");
+            _log.LogInformation("DashboardStateUpdater: hydrating from DB...");
 
-            // Fetch recent entries for each event type we care about, oldest first
-            var allEntries = new List<DISLogEntry>();
-
-            foreach (var eventType in new[]
+            var all = new List<DISLogEntry>();
+            foreach (var type in new[]
             {
                 "state_change", "output_change", "orchestration_change",
                 "entry", "risk", "execution", "exit"
             })
             {
-                var entries = await _db.GetByEventTypeAsync(eventType, 200, ct);
-                allEntries.AddRange(entries);
+                var entries = await _db.GetByEventTypeAsync(type, 200, ct);
+                all.AddRange(entries);
             }
 
-            // Process oldest → newest so final state reflects most recent values
-            foreach (var entry in allEntries.OrderBy(e => e.Id))
-                ApplyEntry(entry);
+            // Oldest → newest so the last value written wins
+            foreach (var e in all.OrderBy(x => x.Id))
+                ApplyEntry(e);
 
             _log.LogInformation(
-                "DashboardStateUpdater: hydrated {Count} entries from DB.", allEntries.Count);
+                "DashboardStateUpdater: replayed {Count} entries from DB.", all.Count);
         }
         catch (Exception ex)
         {
-            _log.LogWarning(ex, "DashboardStateUpdater: history hydration failed — starting with seed data.");
+            _log.LogWarning(ex,
+                "DashboardStateUpdater: DB hydration failed — dashboard starts empty.");
         }
     }
 
-    // ── Live event handlers ───────────────────────────────────────────────────
+    // ── Live handler ──────────────────────────────────────────────────────────
 
-    private void OnLogEntry(DISLogEntry entry) => ApplyEntry(entry);
+    private void OnLiveLogEntry(DISLogEntry entry) => ApplyEntry(entry);
 
-    private void OnFeedHealth(FeedHealthSnapshot snapshot)
-    {
-        // FeedHealthSnapshot is not part of DashboardState panels.
-        // It is handled by components that subscribe to OnFeedHealth directly.
-        // Nothing to do here.
-    }
-
-    // ── Core dispatcher ───────────────────────────────────────────────────────
+    // ── Dispatcher ────────────────────────────────────────────────────────────
 
     private void ApplyEntry(DISLogEntry entry)
     {
@@ -133,16 +122,16 @@ public sealed class DashboardStateUpdater : BackgroundService
                 case "state_change":         ApplyStateChange(entry);         break;
                 case "output_change":        ApplyOutputChange(entry);        break;
                 case "orchestration_change": ApplyOrchestrationChange(entry); break;
-                case "entry":                ApplyEntrySignal(entry);         break;
+                case "entry":                ApplyEntry_(entry);              break;
                 case "risk":                 ApplyRisk(entry);                break;
-                case "execution":            AppendLogEntry(entry, "EXECUTION"); break;
+                case "execution":            ApplyExecution(entry);           break;
                 case "exit":                 ApplyExit(entry);                break;
             }
         }
         catch (Exception ex)
         {
-            _log.LogDebug(ex, "DashboardStateUpdater: failed to apply {Type} entry {Id}",
-                entry.EventType, entry.Id);
+            _log.LogDebug(ex,
+                "DashboardStateUpdater: failed to apply {Type} id={Id}", entry.EventType, entry.Id);
         }
     }
 
@@ -150,41 +139,42 @@ public sealed class DashboardStateUpdater : BackgroundService
 
     private void ApplyStateChange(DISLogEntry entry)
     {
-        using var doc  = JsonDocument.Parse(entry.Payload);
-        var root       = doc.RootElement;
-        var stateName  = root.GetProperty("state").GetString() ?? "";
-        var toValue    = root.GetProperty("to").GetString()    ?? "";
+        using var doc = JsonDocument.Parse(entry.Payload);
+        var root      = doc.RootElement;
+        var name      = Str(root, "state");
+        var from      = Str(root, "from");
+        var to        = Str(root, "to");
 
         _state.Update(s =>
         {
-            // Append to log entries list (cap at 10 for the panel)
-            PrependLog(s, entry.Timestamp, "STATE CHANGE:",
-                $"{stateName}: {root.GetProperty("from").GetString()} → {toValue}");
-
-            // Map specific state names to DashboardState display fields
-            switch (stateName)
+            switch (name)
             {
                 case "structure_phase_state":
-                    s.Regime = toValue;
+                    s.Regime = to;
+                    PushSparkline(s.RegimeSparkline, PhaseToInt(to));
                     break;
 
                 case "volatility_regime_state":
-                    s.Volatility = toValue;
+                    s.Volatility = to;
+                    PushSparkline(s.VolSparkline, VolToInt(to));
                     break;
 
-                case "market_strength" or "momentum_state":
-                    s.Strength = toValue;
+                case "momentum_state":
+                    s.Strength = to;
+                    PushSparkline(s.StrengthSparkline, MomToInt(to));
                     break;
 
-                case "market_structure_state" or "structure_quality_state":
-                    s.StructureCondition = toValue;
+                case "market_structure_state":
+                case "structure_quality_state":
+                    s.StructureCondition = to;
                     break;
             }
 
-            s.LastLogTime    = entry.Timestamp.ToString("HH:mm");
-            s.StateChanges  += 1;
-            s.TotalLogs     += 1;
-            UpdateLogBars(s);
+            PrependLog(s, entry.Timestamp, "STATE CHANGE:", $"{name}: {from} → {to}");
+            s.LastLogTime  = entry.Timestamp.ToString("HH:mm");
+            s.StateChanges++;
+            s.TotalLogs++;
+            RefreshLogBars(s);
         });
     }
 
@@ -192,43 +182,40 @@ public sealed class DashboardStateUpdater : BackgroundService
 
     private void ApplyOutputChange(DISLogEntry entry)
     {
-        using var doc  = JsonDocument.Parse(entry.Payload);
-        var root       = doc.RootElement;
-        var outputName = root.GetProperty("output").GetString() ?? "";
-        var toValue    = root.GetProperty("to").GetString()     ?? "";
+        using var doc = JsonDocument.Parse(entry.Payload);
+        var root      = doc.RootElement;
+        var output    = Str(root, "output");
+        var from      = Str(root, "from");
+        var to        = Str(root, "to");
 
         _state.Update(s =>
         {
-            PrependLog(s, entry.Timestamp, "OUTPUT CHANGE:",
-                $"{outputName}: {root.GetProperty("from").GetString()} → {toValue}");
-
-            switch (outputName)
+            switch (output)
             {
                 case "structural_condition":
-                    s.StructureCondition = toValue;
-                    break;
+                    s.StructureCondition = to; break;
 
                 case "directional_bias":
-                    s.DirectionBias  = toValue;
-                    s.ConflictState  = toValue == "NEUTRAL" ? "HIGH" : "LOW";
+                    s.DirectionBias = to;
+                    s.ConflictState = to == "NEUTRAL" ? "HIGH" : "LOW";
                     break;
 
                 case "volatility_environment":
-                    s.Volatility = toValue;
-                    break;
+                    s.Volatility = to; break;
 
                 case "market_strength":
-                    s.Strength = toValue;
+                    s.Strength = to;
+                    PushSparkline(s.StrengthSparkline, MomToInt(to));
                     break;
 
                 case "risk_environment":
-                    s.RiskEnvLeft  = toValue;
-                    s.RiskEnvRight = toValue;
+                    s.RiskEnvLeft  = to;
+                    s.RiskEnvRight = to;
                     break;
 
                 case "execution_quality":
-                    s.ExecutionQuality    = toValue;
-                    s.ExecutionQualityNum = toValue switch
+                    s.ExecutionQuality    = to;
+                    s.ExecutionQualityNum = to switch
                     {
                         "GOOD"       => "1",
                         "ACCEPTABLE" => "2",
@@ -238,31 +225,29 @@ public sealed class DashboardStateUpdater : BackgroundService
                     break;
 
                 case "crowd_condition":
-                    s.CrowdCondition = toValue;
-                    break;
+                    s.CrowdCondition = to; break;
 
                 case "timeframe_consistency":
-                    s.TfAlignment = toValue;
-                    break;
+                    s.TfAlignment = to; break;
 
                 case "market_behavior_type":
-                    s.BehaviorType = toValue;
-                    break;
+                    s.BehaviorType = to; break;
 
                 case "market_regime":
-                    s.Regime       = toValue;
-                    s.SystemState  = toValue;
+                    s.Regime      = to;
+                    s.SystemState = to;
+                    PushSparkline(s.RegimeSparkline, PhaseToInt(to));
                     break;
 
                 case "trading_permission":
-                    s.TradingPermission = toValue;
-                    break;
+                    s.TradingPermission = to; break;
             }
 
-            s.LastLogTime    = entry.Timestamp.ToString("HH:mm");
-            s.OutputChanges += 1;
-            s.TotalLogs     += 1;
-            UpdateLogBars(s);
+            PrependLog(s, entry.Timestamp, "OUTPUT CHANGE:", $"{output}: {from} → {to}");
+            s.LastLogTime   = entry.Timestamp.ToString("HH:mm");
+            s.OutputChanges++;
+            s.TotalLogs++;
+            RefreshLogBars(s);
         });
     }
 
@@ -275,47 +260,44 @@ public sealed class DashboardStateUpdater : BackgroundService
 
         _state.Update(s =>
         {
-            // strategy
-            if (root.TryGetProperty("strategy", out var strat) &&
-                strat.TryGetProperty("to", out var stratTo))
-                s.ActiveCycleLabel = stratTo.GetString() ?? s.ActiveCycleLabel;
+            if (TryGetChangeTo(root, "portfolio_permission", out var perm))
+                s.TradingPermission = perm;
 
-            // direction → DirectionBias
-            if (root.TryGetProperty("direction", out var dir) &&
-                dir.TryGetProperty("to", out var dirTo))
-                s.DirectionBias = dirTo.GetString() ?? s.DirectionBias;
+            if (TryGetChangeTo(root, "strategy", out var strat))
+                s.ActiveCycleLabel = strat;
 
-            // portfolio_permission → TradingPermission
-            if (root.TryGetProperty("portfolio_permission", out var perm) &&
-                perm.TryGetProperty("to", out var permTo))
-                s.TradingPermission = permTo.GetString() ?? s.TradingPermission;
+            if (TryGetChangeTo(root, "direction", out var dir))
+                s.DirectionBias = dir;
 
-            // confidence → Last logged
-            if (root.TryGetProperty("confidence", out var conf) &&
-                conf.TryGetProperty("to", out var confTo))
-                s.LastLogged = confTo.GetString() ?? s.LastLogged;
+            if (TryGetChangeTo(root, "confidence", out var conf))
+                s.LastLogged = conf;
 
-            s.DecisionLogs += 1;
-            s.TotalLogs    += 1;
-            s.LastLogTime   = entry.Timestamp.ToString("HH:mm");
-            UpdateLogBars(s);
+            // Cycle ID comes from the entry's CycleId field directly
+            if (entry.CycleId > 0)
+            {
+                s.CycleId   = entry.CycleId;
+                UpdateDonut(s);
+            }
+
+            s.DecisionLogs++;
+            s.TotalLogs++;
+            s.LastLogTime = entry.Timestamp.ToString("HH:mm");
+            RefreshLogBars(s);
         });
     }
 
     // ── entry ─────────────────────────────────────────────────────────────────
 
-    private void ApplyEntrySignal(DISLogEntry entry)
+    private void ApplyEntry_(DISLogEntry entry)
     {
         using var doc = JsonDocument.Parse(entry.Payload);
         var root      = doc.RootElement;
-        var signal    = root.GetProperty("signal").GetString() ?? "";
-        var price     = root.TryGetProperty("price",  out var p) ? p.GetDecimal() : 0m;
-        var reason    = root.TryGetProperty("reason", out var r) ? r.GetString() ?? "" : "";
+        var signal    = Str(root, "signal");
+        var price     = Dec(root, "price");
+        var reason    = Str(root, "reason");
+        bool isLong   = signal is "Buy" or "BuyStop" or "BuyLimit";
 
-        bool isLong = signal is "Buy" or "BuyStop" or "BuyLimit";
-
-        // Seed an active trade — risk event will fill in SL/size
-        var trade = new ActiveTrade(
+        _activeTrades[entry.Asset] = new ActiveTrade(
             Asset:      entry.Asset,
             Direction:  isLong ? "LONG" : "SHORT",
             Position:   "FULL",
@@ -323,26 +305,26 @@ public sealed class DashboardStateUpdater : BackgroundService
             Pnl:        0m,
             StopLoss:   0m);
 
-        _activeTrades[entry.Asset] = trade;
-
         _state.Update(s =>
         {
-            // Add to entry signals list (cap at 4)
+            s.ActiveTrades = _activeTrades.Values.ToList();
+
+            // Refresh rank strip — occupied slots = active trade count
+            RefreshRankStrip(s);
+
             var signals = s.EntrySignals.ToList();
-            signals.Insert(0, new SignalRow(entry.Asset, $"{signal} @ {price:N2}", reason));
+            signals.Insert(0, new SignalRow(entry.Asset, $"{signal} @ {price:N5}", reason));
             if (signals.Count > 4) signals.RemoveAt(signals.Count - 1);
             s.EntrySignals = signals;
 
-            // Rebuild active trades list from memory dictionary
-            s.ActiveTrades = _activeTrades.Values.ToList();
-
             PrependLog(s, entry.Timestamp, "ENTRY SIGNAL",
-                $"{signal} {entry.Asset} @ {price:N2}");
+                $"{signal} {entry.Asset} @ {price:N5}");
 
-            s.ActionEvents += 1;
-            s.TotalLogs    += 1;
+            s.CycleAsset    = entry.Asset;
+            s.ActionEvents++;
+            s.TotalLogs++;
             s.LastLogTime   = entry.Timestamp.ToString("HH:mm");
-            UpdateLogBars(s);
+            RefreshLogBars(s);
         });
     }
 
@@ -352,12 +334,11 @@ public sealed class DashboardStateUpdater : BackgroundService
     {
         using var doc = JsonDocument.Parse(entry.Payload);
         var root      = doc.RootElement;
+        var sizeLabel = Str(root, "entry_size");
+        var sl        = Dec(root, "stop_loss");
+        var posSize   = Dec(root, "position_size");
+        var riskPct   = Dec(root, "risk_percent");
 
-        var entrySize = root.TryGetProperty("entry_size",  out var es) ? es.GetString() ?? "" : "";
-        var sl        = root.TryGetProperty("stop_loss",   out var slv) ? slv.GetDecimal() : 0m;
-        var posSize   = root.TryGetProperty("position_size", out var ps) ? ps.GetDecimal() : 0m;
-
-        // Update the active trade for this asset with SL and position size
         if (_activeTrades.TryGetValue(entry.Asset, out var existing))
         {
             _activeTrades[entry.Asset] = existing with
@@ -369,13 +350,33 @@ public sealed class DashboardStateUpdater : BackgroundService
 
         _state.Update(s =>
         {
-            s.PositionSizeLabel = entrySize;
+            s.PositionSizeLabel = sizeLabel;
             s.EnteredSize       = posSize;
             s.StopLossDisplay   = $"{sl:N5} {entry.Asset}";
             s.ActiveTrades      = _activeTrades.Values.ToList();
-            s.TotalLogs        += 1;
+            s.TotalLogs++;
             s.LastLogTime       = entry.Timestamp.ToString("HH:mm");
-            UpdateLogBars(s);
+            RefreshLogBars(s);
+        });
+    }
+
+    // ── execution ─────────────────────────────────────────────────────────────
+
+    private void ApplyExecution(DISLogEntry entry)
+    {
+        using var doc = JsonDocument.Parse(entry.Payload);
+        var root      = doc.RootElement;
+        var execPrice = Dec(root, "execution_price");
+        var slip      = Dec(root, "slippage");
+
+        _state.Update(s =>
+        {
+            PrependLog(s, entry.Timestamp, "EXECUTION",
+                $"{entry.Asset} fill @ {execPrice:N5} slip={slip:N1}pts");
+            s.ActionEvents++;
+            s.TotalLogs++;
+            s.LastLogTime = entry.Timestamp.ToString("HH:mm");
+            RefreshLogBars(s);
         });
     }
 
@@ -385,62 +386,140 @@ public sealed class DashboardStateUpdater : BackgroundService
     {
         using var doc = JsonDocument.Parse(entry.Payload);
         var root      = doc.RootElement;
-
-        var posState  = root.TryGetProperty("position_state", out var ps) ? ps.GetString() ?? "" : "";
-        var pnl       = root.TryGetProperty("pnl",            out var pv) && pv.ValueKind != JsonValueKind.Null
-                          ? pv.GetDecimal() : (decimal?)null;
-        var exitPrice = root.TryGetProperty("exit_price",     out var ep) && ep.ValueKind != JsonValueKind.Null
-                          ? ep.GetDecimal() : (decimal?)null;
-        var reason    = root.TryGetProperty("reason",         out var rv) ? rv.GetString() ?? "" : "";
+        var posState  = Str(root, "position_state");
+        var reason    = Str(root, "reason");
+        var pnl       = root.TryGetProperty("pnl", out var pv) &&
+                        pv.ValueKind == JsonValueKind.Number
+                            ? pv.GetDecimal() : (decimal?)null;
+        var exitPrice = root.TryGetProperty("exit_price", out var ev) &&
+                        ev.ValueKind == JsonValueKind.Number
+                            ? ev.GetDecimal() : (decimal?)null;
 
         if (posState == "Closed")
             _activeTrades.Remove(entry.Asset);
-        else if (_activeTrades.TryGetValue(entry.Asset, out var existing))
-        {
-            _activeTrades[entry.Asset] = existing with
+        else if (_activeTrades.TryGetValue(entry.Asset, out var t))
+            _activeTrades[entry.Asset] = t with
             {
-                Position = posState.ToUpperInvariant(),
-                Pnl      = pnl ?? existing.Pnl
+                Position = posState,
+                Pnl      = pnl ?? t.Pnl
             };
-        }
 
         _state.Update(s =>
         {
             s.ActiveTrades = _activeTrades.Values.ToList();
-
-            // Update portfolio PnL totals
-            s.OpenPnl  = _activeTrades.Values.Sum(t => t.Pnl);
-            s.TotalPnl = s.OpenPnl; // Will be refined when closed-trade PnL tracking is added
+            s.OpenPnl      = _activeTrades.Values.Sum(x => x.Pnl);
+            RefreshRankStrip(s);
 
             PrependLog(s, entry.Timestamp, "EXIT",
-                $"{entry.Asset} [{posState}]{(exitPrice.HasValue ? $" @ {exitPrice:N2}" : "")} {reason}");
+                $"{entry.Asset} [{posState}]{(exitPrice.HasValue ? $" @ {exitPrice:N5}" : "")} {reason}");
 
-            s.ActionEvents += 1;
-            s.TotalLogs    += 1;
-            s.LastLogTime   = entry.Timestamp.ToString("HH:mm");
-            s.LastError     = "NONE";
-            UpdateLogBars(s);
+            s.ActionEvents++;
+            s.TotalLogs++;
+            s.LastLogTime = entry.Timestamp.ToString("HH:mm");
+            s.LastError   = "NONE";
+            RefreshLogBars(s);
         });
     }
 
-    // ── helpers ───────────────────────────────────────────────────────────────
+    // ── Static helpers ────────────────────────────────────────────────────────
 
-    private static void AppendLogEntry(DISLogEntry entry, string typeLabel)
+    private static string Str(JsonElement el, string key) =>
+        el.TryGetProperty(key, out var v) && v.ValueKind == JsonValueKind.String
+            ? v.GetString() ?? "" : "";
+
+    private static decimal Dec(JsonElement el, string key) =>
+        el.TryGetProperty(key, out var v) && v.ValueKind == JsonValueKind.Number
+            ? v.GetDecimal() : 0m;
+
+    /// <summary>Reads {key: {from, to}} and returns the "to" string.</summary>
+    private static bool TryGetChangeTo(JsonElement root, string key, out string to)
     {
-        // Handled inline where needed; this overload is for simple log-only events
+        to = "";
+        if (!root.TryGetProperty(key, out var obj)) return false;
+        if (!obj.TryGetProperty("to", out var toEl)) return false;
+        to = toEl.GetString() ?? "";
+        return to.Length > 0;
+    }
+
+    /// <summary>Appends a new value to a 10-slot sparkline list, dropping the oldest entry.<///></summary>
+    private static void PushSparkline(List<int> sparkline, int value)
+    {
+        sparkline.Add(value);
+        if (sparkline.Count > 10)
+            sparkline.RemoveAt(0);
     }
 
     private static void PrependLog(DashboardState s, DateTime ts, string type, string detail)
     {
-        var entries = s.LogEntries.ToList();
-        entries.Insert(0, new LogEntry(ts.ToString("HH:mm"), type, detail));
-        if (entries.Count > 10) entries.RemoveAt(entries.Count - 1);
-        s.LogEntries = entries;
+        s.LogEntries.Insert(0, new LogEntry(ts.ToString("HH:mm"), type, detail));
+        if (s.LogEntries.Count > 10)
+            s.LogEntries.RemoveAt(s.LogEntries.Count - 1);
     }
 
-    private static void UpdateLogBars(DashboardState s)
+    private static void RefreshLogBars(DashboardState s) =>
+        s.LogBarsFilled = Math.Min(8, s.TotalLogs % 9);
+
+    /// <summary>
+    /// Updates the rank strip to reflect which slots are occupied by active trades.
+    /// </summary>
+    private static void RefreshRankStrip(DashboardState s)
     {
-        // LogBarsFilled visualises how many of the last 8 evaluation slots fired
-        s.LogBarsFilled = Math.Min(8, (s.TotalLogs % 8) + 1);
+        int occupied = s.ActiveTrades.Count;
+        s.AssetsInCycle = occupied;
+        s.CycleRank     = occupied;
+
+        for (int i = 0; i < s.RankStrip.Count; i++)
+        {
+            var r = s.RankStrip[i];
+            s.RankStrip[i] = r with { Active = i < occupied };
+        }
+
+        for (int i = 0; i < s.RankSlots.Count; i++)
+        {
+            var r = s.RankSlots[i];
+            s.RankSlots[i] = r with { Occupied = i < occupied };
+        }
+
+        // Donut reflects occupied / max(5) ratio
+        UpdateDonut(s);
     }
+
+    private static void UpdateDonut(DashboardState s)
+    {
+        // SVG circle circumference at r=32 ≈ 201
+        const double circ = 201.0;
+        double fill  = circ * s.AssetsInCycle / 5.0;
+        s.DonutFill  = Math.Round(fill, 1);
+        s.DonutGap   = Math.Round(circ - fill, 1);
+    }
+
+    // Sparkline value converters (0-100 scale for bar height)
+    private static int PhaseToInt(string v) => v switch
+    {
+        "EMERGING"    or "EMERGING_TREND"  => 30,
+        "ESTABLISHED" or "TREND"           => 60,
+        "EXTENDED"    or "LATE_TREND"      => 80,
+        "EXHAUSTED"   or "STRESS_DISORDER" => 20,
+        "RANGE_BOUND" or "CHOPPY_RANGE"    => 40,
+        "TRANSITIONAL"                     => 50,
+        _                                  => 0
+    };
+
+    private static int VolToInt(string v) => v switch
+    {
+        "COMPRESSED" => 20,
+        "NORMAL"     => 50,
+        "ELEVATED"   => 70,
+        "EXTREME"    => 90,
+        "UNSTABLE"   => 60,
+        _            => 0
+    };
+
+    private static int MomToInt(string v) => v switch
+    {
+        "ACCELERATING" or "STRONG"   => 85,
+        "STABLE"       or "MODERATE" => 50,
+        "DECAYING"     or "WEAK"     => 20,
+        _                            => 0
+    };
 }

@@ -1,48 +1,87 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   DIS DASHBOARD — Radzen Dark Theme Integration
-   Radzen Dark provides the base design tokens. This file:
-     1. Maps DIS palette to Radzen's CSS variables.
-     2. Overrides Radzen component chrome (cards, grids, badges) to match DIS aesthetic.
-     3. Retains DIS-specific structural elements (sparklines, barsets, rank boxes, donut).
-   ─────────────────────────────────────────────────────────────────────────
-   Radzen Dark key tokens (auto-injected by <RadzenTheme Theme="material" /> or dark variant):
-     --rz-base-background-color   #1e1e2e  → panel bg
-     --rz-text-color              #ced4da  → primary text
-     --rz-text-disabled-color     #5a7a96  → muted labels
-     --rz-primary                 #00c8ff  → cyan accent
-     --rz-success                 #00e676  → green
-     --rz-warning                 #ffd600  → yellow
-     --rz-danger                  #ff3d5a  → red
-     --rz-secondary               #2a3d52  → dim
-     --rz-border-disabled-color   #1c2d42  → borders
+   DIS DASHBOARD — Unified Dark Theme
+   Strategy: override Radzen's CSS custom properties at :root so every
+   Radzen component (RadzenCard, RadzenDataGrid, RadzenBadge, RadzenText)
+   inherits our palette automatically, without per-component !important wars.
+   Then patch the few elements that still escape the token system.
 ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ── Map DIS variables to Radzen tokens ─────────────────────────────────── */
+/* ── STEP 1: Override Radzen's injected design tokens ───────────────────────
+   Radzen Dark injects these into :root via its stylesheet. We redefine them
+   here (dashboard.css loads after Radzen) so our values win everywhere.     */
 :root {
-    --bg-base:      #0a0d12;
-    --bg-panel:     var(--rz-base-background-color, #0f1520);
-    --bg-panel-hd:  #111a28;
-    --bg-row:       #141f2e;
-    --border:       var(--rz-border-disabled-color, #1c2d42);
-    --cyan:         var(--rz-primary, #00c8ff);
-    --cyan-dim:     #007aaa;
-    --green:        var(--rz-success, #00e676);
-    --yellow:       var(--rz-warning, #ffd600);
+    /* Core backgrounds */
+    --rz-base-background-color:         #0d1117;
+    --rz-secondary-background-color:    #0a0e14;
+    --rz-card-background-color:         #0d1117;
+    --rz-panel-background-color:        #0d1117;
+    --rz-datatable-background-color:    #0d1117;
+    --rz-sidebar-background-color:      #080b0f;
+
+    /* Text */
+    --rz-text-color:                    #c9d1d9;
+    --rz-text-disabled-color:           #4a6278;
+    --rz-text-title-color:              #f0f6fc;
+    --rz-text-contrast-color:           #f0f6fc;
+
+    /* Borders */
+    --rz-border-radius:                 4px;
+    --rz-border-radius-sm:              2px;
+    --rz-border-disabled-color:         #1a2332;
+    --rz-grid-border-color:             #1a2332;
+
+    /* Accent / semantic colours */
+    --rz-primary:                       #00c8ff;
+    --rz-primary-light:                 rgba(0, 200, 255, 0.12);
+    --rz-primary-lighter:               rgba(0, 200, 255, 0.06);
+    --rz-success:                       #00e676;
+    --rz-success-light:                 rgba(0, 230, 118, 0.12);
+    --rz-warning:                       #ffd600;
+    --rz-warning-light:                 rgba(255, 214, 0, 0.12);
+    --rz-danger:                        #ff3d5a;
+    --rz-danger-light:                  rgba(255, 61, 90, 0.12);
+    --rz-info:                          #00c8ff;
+    --rz-secondary:                     #4a6278;
+
+    /* Shadows — kill all of them */
+    --rz-shadow:                        none;
+    --rz-card-shadow:                   none;
+    --rz-shadow-1:                      none;
+    --rz-shadow-2:                      none;
+    --rz-shadow-3:                      none;
+
+    /* DataGrid row states */
+    --rz-datatable-row-hover-background-color:     #111820;
+    --rz-datatable-row-selected-background-color:  rgba(0, 200, 255, 0.08);
+    --rz-datatable-row-even-background-color:      #0d1117;
+    --rz-datatable-row-odd-background-color:       #0d1117;
+
+    /* ── DIS-specific aliases ── */
+    --bg-base:      #080b0f;
+    --bg-panel:     #0d1117;
+    --bg-panel-hd:  #0a0e14;
+    --bg-row:       #111820;
+    --border:       #1a2332;
+    --cyan:         #00c8ff;
+    --cyan-dim:     #006a8a;
+    --green:        #00e676;
+    --yellow:       #ffd600;
     --orange:       #ff9100;
-    --red:          var(--rz-danger, #ff3d5a);
-    --dim:          #1e2d3d;
-    --text:         var(--rz-text-color, #c8d8e8);
-    --text-muted:   var(--rz-text-disabled-color, #5a7a96);
-    --text-strong:  #ffffff;
+    --red:          #ff3d5a;
+    --dim:          #131c27;
+    --text:         #c9d1d9;
+    --text-muted:   #4a6278;
+    --text-strong:  #f0f6fc;
     --font-mono:    'Courier New', 'Lucida Console', monospace;
-    --panel-radius: var(--rz-border-radius, 4px);
+    --panel-radius: 4px;
     --gap:          6px;
 }
 
+/* ── STEP 2: Base document ──────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-    background: var(--bg-base);
+    background: var(--bg-base) !important;
     color: var(--text);
     font-family: var(--font-mono);
     font-size: 11px;
@@ -50,7 +89,12 @@ html, body {
     overflow: hidden;
 }
 
-/* ── Dashboard shell ────────────────────────────────────────────────────── */
+/* Kill Radzen body-level backgrounds */
+.rz-body,
+.rz-application,
+body .rz-body { background: var(--bg-base) !important; }
+
+/* ── STEP 3: Dashboard shell ─────────────────────────────────────────────── */
 .dis-dashboard {
     display: flex;
     flex-direction: column;
@@ -60,15 +104,15 @@ html, body {
     background: var(--bg-base);
 }
 
-/* ── Header row ─────────────────────────────────────────────────────────── */
+/* ── STEP 4: Header ─────────────────────────────────────────────────────── */
 .dis-header {
     padding: 6px 12px !important;
     background: var(--bg-panel-hd) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--panel-radius) !important;
     flex-shrink: 0;
-    /* Override RadzenRow defaults */
     margin: 0 !important;
+    box-shadow: none !important;
 }
 
 .dis-brand {
@@ -81,12 +125,13 @@ html, body {
 }
 
 .dis-header-badge.rz-badge {
-    background: rgba(0, 200, 255, 0.15) !important;
+    background: rgba(0, 200, 255, 0.12) !important;
     color: var(--cyan) !important;
     border: 1px solid var(--cyan-dim) !important;
     font-size: 10px !important;
     letter-spacing: 1.5px !important;
     font-family: var(--font-mono) !important;
+    box-shadow: none !important;
 }
 
 .dis-clock-time {
@@ -98,7 +143,7 @@ html, body {
     line-height: 1.2 !important;
 }
 
-/* ── Grid rows ──────────────────────────────────────────────────────────── */
+/* ── STEP 5: Grid layout ─────────────────────────────────────────────────── */
 .dis-grid {
     display: grid;
     gap: var(--gap);
@@ -109,24 +154,34 @@ html, body {
 .dis-grid--mid { grid-template-columns: 1.8fr 1fr 1fr; flex: 1.1; }
 .dis-grid--bot { grid-template-columns: 1fr 1fr 1fr;   flex: 0.9; }
 
-/* ── Radzen Card → DIS Panel ─────────────────────────────────────────────  */
-.dis-panel.rz-card,
-.dis-panel {
+/* ── STEP 6: Panel / RadzenCard ─────────────────────────────────────────────
+   RadzenCard generates: background, box-shadow, border-radius
+   We override ALL of them explicitly.                                        */
+.dis-panel,
+.dis-panel.rz-card {
     background: var(--bg-panel) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--panel-radius) !important;
+    box-shadow: none !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
     min-height: 0 !important;
-    padding: 0 !important;         /* card inner padding removed; body handles it */
-    box-shadow: none !important;
+    padding: 0 !important;
 }
 
 .dis-panel.h-100 { height: 100%; }
 
+/* Inner rz-card wrapper that Radzen sometimes adds */
+.dis-panel .rz-card {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    border: none !important;
+}
+
 .dis-panel__header {
-    background: var(--bg-panel-hd);
+    background: var(--bg-panel-hd) !important;
     border-bottom: 1px solid var(--border);
     padding: 5px 10px;
     flex-shrink: 0;
@@ -149,6 +204,7 @@ html, body {
     overflow: hidden;
     flex: 1;
     min-height: 0;
+    background: var(--bg-panel);
 }
 
 .dis-panel__body--cols {
@@ -165,7 +221,7 @@ html, body {
     padding: 0;
 }
 
-/* ── KV rows ────────────────────────────────────────────────────────────── */
+/* ── STEP 7: KV rows & labels ────────────────────────────────────────────── */
 .dis-kv-row {
     display: flex;
     align-items: center;
@@ -182,42 +238,63 @@ html, body {
     font-family: var(--font-mono) !important;
 }
 
-/* ── Radzen Badge overrides ──────────────────────────────────────────────── */
+/* General RadzenText inside panels */
+.dis-panel .rz-text { font-family: var(--font-mono) !important; }
+
+/* ── STEP 8: Badges ─────────────────────────────────────────────────────── */
+.dis-badge-sm.rz-badge { font-size: 9px !important; padding: 1px 6px !important; }
+.dis-badge-xs.rz-badge { font-size: 9px !important; padding: 0 4px !important; }
+
 .dis-badge-sm.rz-badge,
-.rz-badge.dis-badge-sm {
-    font-size: 9px !important;
-    padding: 1px 6px !important;
+.dis-badge-xs.rz-badge {
     border-radius: 2px !important;
     font-weight: 700 !important;
     letter-spacing: 0.8px !important;
     text-transform: uppercase !important;
     white-space: nowrap !important;
     font-family: var(--font-mono) !important;
+    box-shadow: none !important;
 }
 
-.dis-badge-xs.rz-badge,
-.rz-badge.dis-badge-xs {
-    font-size: 9px !important;
-    padding: 0 4px !important;
-    border-radius: 2px !important;
-    font-family: var(--font-mono) !important;
+/* Semantic badge colours — full override */
+.rz-badge.rz-badge-success  {
+    background: #001f0e !important;
+    color: var(--green) !important;
+    border: 1px solid #00391a !important;
+}
+.rz-badge.rz-badge-info     {
+    background: #00182a !important;
+    color: var(--cyan) !important;
+    border: 1px solid var(--cyan-dim) !important;
+}
+.rz-badge.rz-badge-warning  {
+    background: #1f1800 !important;
+    color: var(--yellow) !important;
+    border: 1px solid #3d3000 !important;
+}
+.rz-badge.rz-badge-danger   {
+    background: #25000c !important;
+    color: var(--red) !important;
+    border: 1px solid #4a0018 !important;
+}
+.rz-badge.rz-badge-secondary {
+    background: var(--dim) !important;
+    color: var(--text-muted) !important;
+    border: 1px solid #1e2d3d !important;
 }
 
-/* Restyle Radzen badge colour classes to match DIS palette */
-.rz-badge.rz-badge-success  { background: #00391a !important; color: var(--green) !important; border: 1px solid #00562a !important; }
-.rz-badge.rz-badge-info     { background: #002840 !important; color: var(--cyan)  !important; border: 1px solid var(--cyan-dim) !important; }
-.rz-badge.rz-badge-warning  { background: #332800 !important; color: var(--yellow) !important; border: 1px solid #665200 !important; }
-.rz-badge.rz-badge-danger   { background: #3d0010 !important; color: var(--red)   !important; border: 1px solid #7a0020 !important; }
-.rz-badge.rz-badge-secondary{ background: var(--dim) !important; color: var(--text-muted) !important; border: 1px solid #253545 !important; }
+/* ── STEP 9: RadzenDataGrid (Active Trades) ─────────────────────────────── */
 
-/* ── Radzen DataGrid → DIS Trades table ─────────────────────────────────── */
-.dis-trade-grid .rz-data-grid {
-    border: none !important;
-    background: transparent !important;
-}
+/* Wrapper */
+.dis-trade-grid { background: transparent !important; }
+.dis-trade-grid .rz-data-grid,
+.dis-trade-grid .rz-datatable { background: transparent !important; border: none !important; }
 
-.dis-trade-grid .rz-data-grid-header,
-.dis-trade-grid .rz-column-title {
+/* Header cells */
+.dis-trade-grid .rz-column-header,
+.dis-trade-grid .rz-column-title,
+.dis-trade-grid th,
+.dis-trade-grid .rz-data-grid-header tr th {
     background: var(--bg-panel-hd) !important;
     color: var(--text-muted) !important;
     font-size: 9px !important;
@@ -225,46 +302,81 @@ html, body {
     text-transform: uppercase !important;
     letter-spacing: 0.8px !important;
     border-bottom: 1px solid var(--border) !important;
+    border-right: none !important;
     font-family: var(--font-mono) !important;
-    padding: 6px 10px !important;
+    padding: 5px 10px !important;
 }
 
+/* Data rows */
+.dis-trade-grid td,
 .dis-trade-grid .rz-data-row td,
-.dis-trade-grid .rz-body-row td {
-    padding: 6px 10px !important;
-    border-bottom: 1px solid var(--border) !important;
+.dis-trade-grid .rz-body-row td,
+.dis-trade-grid .rz-data-grid-body td {
+    background: var(--bg-panel) !important;
     color: var(--text) !important;
     font-size: 11px !important;
     font-family: var(--font-mono) !important;
-    background: transparent !important;
+    padding: 6px 10px !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-right: none !important;
 }
 
+/* Hover */
 .dis-trade-grid .rz-data-row:hover td,
 .dis-trade-grid .rz-body-row:hover td {
     background: var(--bg-row) !important;
 }
 
+/* Alternating row override (kill Radzen zebra) */
+.dis-trade-grid .rz-data-row:nth-child(even) td,
+.dis-trade-grid .rz-body-row:nth-child(even) td {
+    background: var(--bg-panel) !important;
+}
+
+/* Scrollable header bar */
+.dis-trade-grid .rz-datatable-scrollable-header,
+.dis-trade-grid .rz-data-grid-data {
+    background: var(--bg-panel) !important;
+}
+
+/* Empty state */
 .dis-trade-grid .rz-empty-row td {
+    background: var(--bg-panel) !important;
     color: var(--text-muted) !important;
     font-size: 11px !important;
     padding: 16px 10px !important;
     font-family: var(--font-mono) !important;
 }
 
-.dis-trade-grid .rz-datatable-scrollable-header {
-    background: var(--bg-panel-hd) !important;
+/* Grid outer border */
+.dis-trade-grid .rz-data-grid {
+    border: none !important;
+    box-shadow: none !important;
 }
 
-/* ── RadzenText overrides ────────────────────────────────────────────────── */
-.rz-text { font-family: var(--font-mono) !important; }
+/* ── STEP 10: RadzenDivider ─────────────────────────────────────────────── */
+.rz-divider,
+.rz-divider-horizontal { border-color: var(--border) !important; }
 
-/* ── RadzenDivider override ──────────────────────────────────────────────── */
-.rz-divider { border-color: var(--border) !important; }
+/* ── STEP 11: RadzenRow / RadzenStack margin resets ──────────────────────── */
+.rz-row  { margin-left: 0 !important; margin-right: 0 !important; }
+.rz-col  { padding: 0 !important; }
 
-/* ── RadzenRow / RadzenStack margin resets ───────────────────────────────── */
-.rz-row { margin: 0 !important; }
+/* ── STEP 12: Footer ─────────────────────────────────────────────────────── */
+.dis-footer {
+    padding: 5px 12px !important;
+    background: var(--bg-panel-hd) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--panel-radius) !important;
+    flex-shrink: 0 !important;
+    font-family: var(--font-mono) !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+}
 
-/* ── Sparklines ─────────────────────────────────────────────────────────── */
+.dis-sep { color: var(--border); }
+
+/* ── STEP 13: Sparklines ────────────────────────────────────────────────── */
 .dis-sparkline {
     display: flex;
     align-items: flex-end;
@@ -280,9 +392,9 @@ html, body {
 }
 
 .dis-sparkline--green .dis-sparkline__bar { background: var(--green); }
-.dis-sparkline--dim   .dis-sparkline__bar { background: var(--text-muted); opacity: 0.6; }
+.dis-sparkline--dim   .dis-sparkline__bar { background: var(--text-muted); opacity: 0.5; }
 
-/* ── Bar set (log progress) ─────────────────────────────────────────────── */
+/* ── STEP 14: Log bar set ────────────────────────────────────────────────── */
 .dis-barset {
     display: flex;
     gap: 2px;
@@ -295,11 +407,15 @@ html, body {
     height: 12px;
     border-radius: 1px;
     background: var(--dim);
+    border: 1px solid var(--border);
 }
 
-.dis-barset__bar--lit { background: var(--cyan); }
+.dis-barset__bar--lit {
+    background: var(--cyan);
+    border-color: var(--cyan-dim);
+}
 
-/* ── Output Diagnostics columns ─────────────────────────────────────────── */
+/* ── STEP 15: Output Diagnostics columns ─────────────────────────────────── */
 .dis-diag-col {
     flex: 1;
     padding: 8px 10px;
@@ -307,42 +423,40 @@ html, body {
     flex-direction: column;
     gap: 5px;
     border-right: 1px solid var(--border);
+    background: var(--bg-panel);
 }
 
 .dis-diag-col:last-child { border-right: none; }
 
-/* ── Re-rank display ─────────────────────────────────────────────────────── */
+/* ── STEP 16: Re-rank display ────────────────────────────────────────────── */
 .dis-rerank__next {
-    background: var(--bg-panel-hd);
+    background: rgba(0, 200, 255, 0.06);
     border: 1px solid var(--cyan-dim);
     color: var(--cyan);
     font-size: 10px;
-    padding: 1px 8px;
+    padding: 2px 8px;
     border-radius: 2px;
     font-weight: 600;
     font-family: var(--font-mono);
+    letter-spacing: 0.5px;
 }
 
-/* ── Rank strip ──────────────────────────────────────────────────────────── */
-.dis-rank-strip {
-    display: flex;
-    gap: 3px;
-    margin-top: 2px;
-}
+/* ── STEP 17: Rank strip ─────────────────────────────────────────────────── */
+.dis-rank-strip { display: flex; gap: 3px; margin-top: 2px; }
 
 .dis-rank-strip__slot {
     display: flex;
     flex-direction: column;
     align-items: center;
     background: var(--dim);
-    border: 1px solid #1e3048;
+    border: 1px solid var(--border);
     border-radius: 2px;
     padding: 2px 6px;
     min-width: 28px;
 }
 
 .dis-rank-strip__slot--active {
-    background: #002840;
+    background: rgba(0, 200, 255, 0.08);
     border-color: var(--cyan-dim);
 }
 
@@ -361,7 +475,7 @@ html, body {
     font-family: var(--font-mono);
 }
 
-/* ── Rank grid (diagnostics) ─────────────────────────────────────────────── */
+/* ── STEP 18: Rank boxes (diagnostics) ───────────────────────────────────── */
 .dis-rank-grid { display: flex; gap: 4px; }
 .dis-rank-grid--sub { margin-top: -2px; }
 
@@ -370,7 +484,7 @@ html, body {
     height: 32px;
     border-radius: 3px;
     background: var(--dim);
-    border: 1px solid #1e3048;
+    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -381,13 +495,13 @@ html, body {
 }
 
 .dis-rank-box--occupied {
-    background: #002840;
+    background: rgba(0, 200, 255, 0.08);
     border-color: var(--cyan-dim);
     color: var(--cyan);
 }
 
 .dis-rank-box--highlighted {
-    background: #003d00;
+    background: rgba(0, 230, 118, 0.08);
     border-color: #00562a;
     color: var(--green);
 }
@@ -400,14 +514,8 @@ html, body {
     font-family: var(--font-mono);
 }
 
-/* ── Cycle donut ─────────────────────────────────────────────────────────── */
-.dis-cycle-status {
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-    margin-top: 4px;
-}
-
+/* ── STEP 19: Cycle donut ────────────────────────────────────────────────── */
+.dis-cycle-status { display: flex; gap: 12px; align-items: flex-start; margin-top: 4px; }
 .dis-donut { width: 64px; height: 64px; flex-shrink: 0; }
 
 .dis-donut__big {
@@ -432,10 +540,7 @@ html, body {
 }
 
 .dis-cycle-legend-grid,
-.dis-cycle-id-row {
-    display: flex;
-    gap: 4px;
-}
+.dis-cycle-id-row { display: flex; gap: 4px; }
 
 .dis-cycle-legend__item,
 .dis-cycle-id__item {
@@ -443,7 +548,7 @@ html, body {
     height: 20px;
     border-radius: 3px;
     background: var(--dim);
-    border: 1px solid #1e3048;
+    border: 1px solid var(--border);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -454,12 +559,12 @@ html, body {
 }
 
 .dis-cycle-legend__item--active {
-    background: #002840;
+    background: rgba(0, 200, 255, 0.1);
     border-color: var(--cyan-dim);
     color: var(--cyan);
 }
 
-/* ── Log entries ─────────────────────────────────────────────────────────── */
+/* ── STEP 20: Log entries ────────────────────────────────────────────────── */
 .dis-log-entry {
     display: grid;
     grid-template-columns: 36px 90px 1fr;
@@ -473,9 +578,9 @@ html, body {
 
 .dis-log-entry:last-child { border-bottom: none; }
 
-.dis-log__time   { color: var(--text-muted) !important; }
-.dis-log__type   { font-weight: 700; color: var(--text-muted); font-size: 9px !important; letter-spacing: 0.5px; }
-.dis-log__detail { color: var(--text) !important; font-size: 10px !important; }
+.dis-log__time   { color: var(--text-muted) !important; font-family: var(--font-mono) !important; }
+.dis-log__detail { color: var(--text) !important; font-size: 10px !important; font-family: var(--font-mono) !important; }
+.dis-log__type   { font-weight: 700; color: var(--text-muted); font-size: 9px !important; letter-spacing: 0.5px; font-family: var(--font-mono) !important; }
 
 .dis-log__type--state  { color: var(--cyan) !important; }
 .dis-log__type--output { color: var(--yellow) !important; }
@@ -483,20 +588,19 @@ html, body {
 .dis-log__type--exec   { color: var(--orange) !important; }
 .dis-log__type--exit   { color: var(--red) !important; }
 
-/* ── Stat rows ───────────────────────────────────────────────────────────── */
+/* ── STEP 21: Stat rows ──────────────────────────────────────────────────── */
 .dis-stat-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 4px 0;
     border-bottom: 1px solid var(--border);
-    font-size: 10px;
     font-family: var(--font-mono);
 }
 
 .dis-stat-row:last-child { border-bottom: none; }
 
-/* ── Signal columns ─────────────────────────────────────────────────────── */
+/* ── STEP 22: Signal columns ─────────────────────────────────────────────── */
 .dis-signals-col {
     flex: 1;
     padding: 8px 10px;
@@ -505,6 +609,7 @@ html, body {
     gap: 5px;
     border-right: 1px solid var(--border);
     overflow: hidden;
+    background: var(--bg-panel);
 }
 
 .dis-signals-col:last-child { border-right: none; }
@@ -539,45 +644,66 @@ html, body {
 
 .dis-risk-badges { display: flex; gap: 3px; flex-wrap: wrap; }
 
-/* ── Footer bar ──────────────────────────────────────────────────────────── */
-.dis-footer {
-    padding: 5px 12px !important;
-    background: var(--bg-panel-hd) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: var(--panel-radius) !important;
-    flex-shrink: 0 !important;
-    font-size: 10px !important;
-    font-family: var(--font-mono) !important;
-    margin: 0 !important;
-}
-
-.dis-sep { color: var(--border); }
-
-/* ── Scrollbar ───────────────────────────────────────────────────────────── */
+/* ── STEP 23: Scrollbars ─────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: var(--bg-base); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-/* ── Pulse animation ────────────────────────────────────────────────────── */
-@keyframes pulse-border {
-    0%   { box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.4); }
+/* ── STEP 24: Pulse animation on Info badges ─────────────────────────────── */
+@keyframes pulse-cyan {
+    0%   { box-shadow: 0 0 0 0 rgba(0, 200, 255, 0.35); }
     70%  { box-shadow: 0 0 0 4px rgba(0, 200, 255, 0); }
     100% { box-shadow: 0 0 0 0 rgba(0, 200, 255, 0); }
 }
 
-.rz-badge.rz-badge-info {
-    animation: pulse-border 2s ease-in-out infinite;
+/* Only pulse directional / live badges, not every info badge */
+.dis-badge-live.rz-badge { animation: pulse-cyan 2s ease-in-out infinite; }
+
+/* ── STEP 25: RadzenIcon colour ───────────────────────────────────────────── */
+.rz-icon { font-family: 'Material Icons' !important; }
+
+/* ── ADDENDUM: Deep RadzenDataGrid element overrides ─────────────────────
+   Radzen renders several wrapper divs inside the grid that carry their own
+   background. Target them all to ensure full panel-colour consistency.     */
+
+.dis-trade-grid .rz-data-grid-data,
+.dis-trade-grid .rz-datatable-scrollable-body,
+.dis-trade-grid .rz-datatable-scrollable-header-box,
+.dis-trade-grid .rz-datatable-scrollable-header,
+.dis-trade-grid .rz-datatable-scrollable-wrapper,
+.dis-trade-grid .rz-data-grid-header,
+.dis-trade-grid > div,
+.dis-trade-grid .rz-grid-table-wrapper {
+    background: var(--bg-panel) !important;
 }
 
-/* Disable pulse for non-directional badges */
-.rz-badge.rz-badge-info.dis-badge-xs { animation: none; }
-
-/* ── Radzen global dark overrides ────────────────────────────────────────── */
-body .rz-body,
-.rz-application { background: var(--bg-base) !important; }
-
-/* Kill Radzen card box-shadow and default bg in panel context */
-.dis-panel .rz-card {
-    box-shadow: none !important;
-    background: transparent !important;
+/* Column header inner spans */
+.dis-trade-grid .rz-column-header-content,
+.dis-trade-grid .rz-sortable-column-header {
+    color: var(--text-muted) !important;
+    font-size: 9px !important;
+    font-family: var(--font-mono) !important;
+    letter-spacing: 0.8px !important;
+    text-transform: uppercase !important;
 }
+
+/* Remove all Radzen grid borders except our bottom row border */
+.dis-trade-grid table,
+.dis-trade-grid .rz-grid-table { border-collapse: collapse !important; }
+
+.dis-trade-grid th { border-top: none !important; border-left: none !important; border-right: none !important; }
+.dis-trade-grid td { border-top: none !important; border-left: none !important; border-right: none !important; }
+
+/* ── Ensure RadzenStack / RadzenRow never bleed a white background ─────── */
+.rz-stack,
+.rz-row,
+.rz-col { background: transparent !important; }
+
+/* ── Make dis-panel__body bg explicit so no Radzen token bleeds in ──────── */
+.dis-panel__body,
+.dis-panel__body--cols,
+.dis-panel__body--rank,
+.dis-panel__body--signals { background: var(--bg-panel) !important; }
+
+/* ── app.css body rule guard — force our bg over any Radzen body injection */
+body { background-color: var(--bg-base) !important; }
