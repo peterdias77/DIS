@@ -1,0 +1,48 @@
+@using DIS.Dashboard.Models
+
+<div class="dis-panel">
+    <div class="dis-panel__header">LOGGING SUMMARY</div>
+    <div class="dis-panel__body">
+
+        <div class="dis-kv-row">
+            <span class="dis-kv__label">POSITION SIZE:</span>
+            <span class="dis-badge dis-badge--cyan dis-badge--arrow-up">@State.PositionSizeLabel</span>
+        </div>
+
+        <div class="dis-kv-row">
+            <span class="dis-kv__label">ENTERED SIZE:</span>
+            <span class="dis-kv__value">@State.EnteredSize LOTS</span>
+        </div>
+
+        <div class="dis-stat-row">
+            <span class="dis-stat__label">TOTAL LOGS</span>
+            <span class="dis-stat__value">@State.TotalLogs</span>
+        </div>
+
+        <div class="dis-stat-row">
+            <span class="dis-stat__label">ACTIVE CYCLE:</span>
+            <span class="dis-stat__value dis-badge dis-badge--orange">@State.ActiveCycleLabel</span>
+        </div>
+
+        <div class="dis-stat-row">
+            <span class="dis-stat__label">LAST LOGGED:</span>
+            <span class="dis-stat__value dis-badge dis-badge--orange">@State.LastLogged</span>
+        </div>
+
+        <div class="dis-kv-row">
+            <span class="dis-kv__label">STOP LOSS:</span>
+            <span class="dis-kv__value">@State.StopLossDisplay</span>
+            <span class="dis-badge dis-badge--green dis-badge--xs">↑</span>
+        </div>
+
+        <div class="dis-kv-row">
+            <span class="dis-kv__label">LAST ERROR:</span>
+            <span class="dis-badge dis-badge--dim">@State.LastError</span>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;
+}

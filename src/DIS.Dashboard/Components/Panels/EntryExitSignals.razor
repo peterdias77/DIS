@@ -1,0 +1,67 @@
+@using DIS.Dashboard.Models
+
+<div class="dis-panel">
+    <div class="dis-panel__header">
+        ENTRY &amp; EXIT SIGNALS
+        <span class="dis-header__pencil">✎</span>
+    </div>
+    <div class="dis-panel__body dis-panel__body--signals">
+
+        <!-- State signals column -->
+        <div class="dis-signals-col">
+            <div class="dis-signals-col__header">
+                STATE SIGNALS <span class="dis-arrow-icon">↗</span>
+            </div>
+
+            @foreach (var sig in State.StateSignals)
+            {
+                <div class="dis-signal-row">
+                    <span class="dis-signal__asset">@sig.Asset</span>
+                    <div class="dis-signal__chart">
+                        <span class="dis-signal__chart-label">@sig.ChartLine1</span>
+                        <span class="dis-signal__chart-label">@sig.ChartLine2</span>
+                    </div>
+                </div>
+            }
+
+            <div class="dis-signals-col__footer">
+                <span>RISK LEVEL</span>
+                <div class="dis-risk-badges">
+                    @foreach (var b in State.RiskBadges)
+                    {
+                        <span class="dis-badge dis-badge--risk">@b</span>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <!-- Entry signals column -->
+        <div class="dis-signals-col">
+            <div class="dis-signals-col__header">ENTRY SIGNALS</div>
+
+            @foreach (var sig in State.EntrySignals)
+            {
+                <div class="dis-signal-row">
+                    <span class="dis-signal__asset">@sig.Asset</span>
+                    <div class="dis-signal__chart">
+                        <span class="dis-signal__chart-label">@sig.ChartLine1</span>
+                        <span class="dis-signal__chart-label">@sig.ChartLine2</span>
+                    </div>
+                    <span class="dis-badge dis-badge--xs dis-badge--dim">↓</span>
+                </div>
+            }
+
+            <div class="dis-signals-col__footer">
+                <span>RISK</span>
+                <div class="dis-risk-badges">
+                    <span class="dis-badge dis-badge--risk">@State.EntryRisk</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;
+}

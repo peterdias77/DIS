@@ -1,0 +1,51 @@
+@using DIS.Dashboard.Models
+
+<div class="dis-panel">
+    <div class="dis-panel__header">PORTFOLIO OVERVIEW</div>
+    <div class="dis-panel__body">
+
+        <div class="dis-kv-row dis-kv-row--cycle">
+            <span class="dis-kv__label">CYCLE:</span>
+            <span class="dis-kv__value">
+                RANK <strong>@State.CycleRank</strong> OF <strong>@State.CycleMax</strong>
+            </span>
+            <span class="dis-badge dis-badge--cyan dis-badge--sm">@State.CycleAsset</span>
+        </div>
+
+        <div class="dis-kv-row">
+            <span class="dis-kv__label">ASSETS IN CYCLE:</span>
+            <span class="dis-kv__value">@State.AssetsInCycle</span>
+        </div>
+
+        <div class="dis-kv-row">
+            <span class="dis-kv__label">TRADING PERMISSION:</span>
+            <span class="dis-badge @(State.TradingPermission == "ALLOW" ? "dis-badge--green" : "dis-badge--red")">
+                @State.TradingPermission
+            </span>
+        </div>
+
+        <div class="dis-kv-row dis-kv-row--pnl">
+            <span class="dis-kv__label">OPEN P/L:</span>
+            <span class="dis-pnl @(State.OpenPnl >= 0 ? "dis-pnl--pos" : "dis-pnl--neg")">
+                @(State.OpenPnl >= 0 ? "+" : "")$@State.OpenPnl.ToString("N2")
+            </span>
+        </div>
+
+        <div class="dis-kv-row dis-kv-row--pnl">
+            <span class="dis-kv__label">TOTAL P/L:</span>
+            <span class="dis-pnl dis-pnl--lg @(State.TotalPnl >= 0 ? "dis-pnl--pos" : "dis-pnl--neg")">
+                @(State.TotalPnl >= 0 ? "+" : "")$@State.TotalPnl.ToString("N2")
+            </span>
+        </div>
+
+        <div class="dis-kv-row">
+            <span class="dis-kv__label">SYSTEM STATE:</span>
+            <span class="dis-badge dis-badge--cyan dis-badge--arrow-down">@State.SystemState</span>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;
+}

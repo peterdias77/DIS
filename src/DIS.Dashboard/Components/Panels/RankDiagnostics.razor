@@ -1,0 +1,59 @@
+@using DIS.Dashboard.Models
+
+<div class="dis-panel">
+    <div class="dis-panel__header">RANK DIAGNOSTICS</div>
+    <div class="dis-panel__body dis-panel__body--rank">
+
+        <!-- Rank boxes -->
+        <div class="dis-rank-grid">
+            @foreach (var slot in State.RankSlots)
+            {
+                <div class="dis-rank-box @(slot.Occupied ? "dis-rank-box--occupied" : "") @(slot.Highlighted ? "dis-rank-box--highlighted" : "")">
+                    <span class="dis-rank-box__num">@slot.Rank</span>
+                </div>
+            }
+        </div>
+
+        <!-- Rank sub-labels -->
+        <div class="dis-rank-grid dis-rank-grid--sub">
+            @foreach (var slot in State.RankSlots)
+            {
+                <div class="dis-rank-sub">@slot.Rank</div>
+            }
+        </div>
+
+        <!-- Cycle status donut -->
+        <div class="dis-cycle-status">
+            <svg class="dis-donut" viewBox="0 0 80 80">
+                <circle cx="40" cy="40" r="32" fill="none" stroke="#1e2a3a" stroke-width="8"/>
+                <circle cx="40" cy="40" r="32" fill="none" stroke="#00c8ff" stroke-width="8"
+                        stroke-dasharray="@State.DonutFill @State.DonutGap"
+                        stroke-dashoffset="25" stroke-linecap="round"/>
+                <text x="40" y="38" text-anchor="middle" class="dis-donut__big">@State.CycleId</text>
+                <text x="40" y="52" text-anchor="middle" class="dis-donut__small">CYCLE</text>
+            </svg>
+
+            <div class="dis-cycle-status__legend">
+                <div class="dis-cycle-legend-grid">
+                    @foreach (int n in new[] { 1, 2, 3, 4 })
+                    {
+                        <span class="dis-cycle-legend__item @(n <= State.AssetsInCycle ? "dis-cycle-legend__item--active" : "")">@n</span>
+                    }
+                </div>
+                <div class="dis-cycle-status__label">CYCLE STATUS</div>
+                <div class="dis-cycle-id-row">
+                    @foreach (int n in new[] { 1, 2, 3, 4 })
+                    {
+                        <span class="dis-cycle-id__item">@n</span>
+                    }
+                </div>
+                <div class="dis-cycle-id-label">CYCLE ID: @State.CycleId</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;
+}

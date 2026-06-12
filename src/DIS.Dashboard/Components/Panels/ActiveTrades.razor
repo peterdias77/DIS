@@ -1,0 +1,38 @@
+@using DIS.Dashboard.Models
+
+<div class="dis-panel dis-panel--trades">
+    <div class="dis-panel__header">ACTIVE TRADES</div>
+    <div class="dis-trades-table">
+
+        <div class="dis-trades-table__head">
+            <span>ASSET</span>
+            <span>DIRECTION</span>
+            <span>POSITION</span>
+            <span>ENTRY</span>
+            <span>P/NL</span>
+            <span>STOP LOSS</span>
+        </div>
+
+        @foreach (var (trade, idx) in State.ActiveTrades.Select((t, i) => (t, i + 1)))
+        {
+            <div class="dis-trades-table__row">
+                <span class="dis-trade__asset">@idx. @trade.Asset</span>
+                <span class="dis-badge @(trade.Direction == "LONG" ? "dis-badge--green" : "dis-badge--red") dis-badge--dir">
+                    @trade.Direction
+                    <span class="dis-badge__arrow">@(trade.Direction == "LONG" ? "▲" : "▼")</span>
+                </span>
+                <span class="dis-trade__pos">@trade.Position</span>
+                <span class="dis-trade__entry">@trade.EntryPrice.ToString("N2")</span>
+                <span class="dis-trade__pnl @(trade.Pnl >= 0 ? "dis-pnl--pos" : "dis-pnl--neg")">
+                    @(trade.Pnl >= 0 ? "+" : "")$@trade.Pnl.ToString("N2")
+                </span>
+                <span class="dis-trade__sl">@trade.StopLoss.ToString("N2")</span>
+            </div>
+        }
+
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;
+}

@@ -1,0 +1,31 @@
+@using DIS.Dashboard.Models
+
+<div class="dis-panel">
+    <div class="dis-panel__header">LOGGING SUMMARY</div>
+    <div class="dis-panel__body">
+
+        @foreach (var entry in State.LogEntries)
+        {
+            <div class="dis-log-entry">
+                <span class="dis-log__time">@entry.Time</span>
+                <span class="dis-log__type @GetTypeClass(entry.Type)">@entry.Type</span>
+                <span class="dis-log__detail">@entry.Detail</span>
+            </div>
+        }
+
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;
+
+    private static string GetTypeClass(string type) => type switch
+    {
+        "STATE CHANGE:"  => "dis-log__type--state",
+        "OUTPUT CHANGE:" => "dis-log__type--output",
+        "ENTRY SIGNAL"   => "dis-log__type--entry",
+        "EXECUTION"      => "dis-log__type--exec",
+        "EXIT"           => "dis-log__type--exit",
+        _                => ""
+    };
+}

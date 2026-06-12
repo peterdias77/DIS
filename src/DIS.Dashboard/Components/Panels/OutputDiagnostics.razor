@@ -1,0 +1,68 @@
+@using DIS.Dashboard.Models
+
+<div class="dis-panel dis-panel--wide">
+    <div class="dis-panel__header">OUTPUT DIAGNOSTICS</div>
+    <div class="dis-panel__body dis-panel__body--cols">
+
+        <!-- Left column -->
+        <div class="dis-diag-col">
+            <div class="dis-kv-row">
+                <span class="dis-kv__label">CONFLICT STATE:</span>
+                <span class="dis-badge dis-badge--green dis-badge--arrow-up">@State.ConflictState</span>
+            </div>
+            <div class="dis-kv-row">
+                <span class="dis-kv__label">DIRECTION BIAS:</span>
+                <span class="dis-badge dis-badge--cyan dis-badge--arrow-up">@State.DirectionBias</span>
+            </div>
+            <div class="dis-kv-row">
+                <span class="dis-kv__label">RISK ENVIRONMENT:</span>
+                <span class="dis-badge dis-badge--yellow">@State.RiskEnvLeft</span>
+            </div>
+            <div class="dis-kv-row dis-kv-row--rerank">
+                <span class="dis-kv__label">RE-RANK:</span>
+                <div class="dis-rerank">
+                    <span class="dis-rerank__next">NEXT RANK @State.ReRankCountdown</span>
+                </div>
+            </div>
+            <div class="dis-rank-strip">
+                @foreach (var r in State.RankStrip)
+                {
+                    <div class="dis-rank-strip__slot @(r.Active ? "dis-rank-strip__slot--active" : "")">
+                        <span class="dis-rank-strip__num">@r.Number</span>
+                        <span class="dis-rank-strip__sub">@r.Sub</span>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="dis-diag-col">
+            <div class="dis-kv-row">
+                <span class="dis-kv__label">RISK ENVIRONMENT:</span>
+                <span class="dis-badge dis-badge--yellow">@State.RiskEnvRight</span>
+            </div>
+            <div class="dis-kv-row">
+                <span class="dis-kv__label">EXECUTION QUALITY:</span>
+                <span class="dis-badge dis-badge--green">@State.ExecutionQuality</span>
+                <span class="dis-kv__value dis-kv__muted">@State.ExecutionQualityNum</span>
+            </div>
+            <div class="dis-kv-row">
+                <span class="dis-kv__label">BEHAVIOR TYPE:</span>
+                <span class="dis-kv__value">@State.BehaviorType</span>
+            </div>
+            <div class="dis-kv-row">
+                <span class="dis-kv__label">CROWD CONDITION:</span>
+                <span class="dis-kv__value">@State.CrowdCondition</span>
+            </div>
+            <div class="dis-kv-row">
+                <span class="dis-kv__label">TIMEFRAME ALIGNMENT:</span>
+                <span class="dis-badge dis-badge--cyan">@State.TfAlignment</span>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;
+}

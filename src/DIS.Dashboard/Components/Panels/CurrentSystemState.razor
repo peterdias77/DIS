@@ -1,0 +1,62 @@
+@using DIS.Dashboard.Models
+
+<div class="dis-panel">
+    <div class="dis-panel__header">CURRENT SYSTEM STATE</div>
+    <div class="dis-panel__body">
+
+        <div class="dis-kv-row">
+            <span class="dis-kv__label">STRUCTURE:</span>
+            <span class="dis-badge dis-badge--green">@State.StructureCondition</span>
+            <span class="dis-badge dis-badge--cyan dis-badge--arrow-up">TREND @State.CycleId</span>
+        </div>
+
+        <div class="dis-kv-row">
+            <span class="dis-kv__label">REGIME:</span>
+            <span class="dis-regime-value">@State.Regime</span>
+            <div class="dis-sparkline dis-sparkline--green">
+                @foreach (var v in State.RegimeSparkline)
+                {
+                    <div class="dis-sparkline__bar" style="height: @(v)%"></div>
+                }
+            </div>
+        </div>
+
+        <div class="dis-kv-row">
+            <span class="dis-kv__label">VOLATILITY:</span>
+            <span class="dis-kv__value dis-kv__value--normal">@State.Volatility</span>
+            <div class="dis-sparkline dis-sparkline--dim">
+                @foreach (var v in State.VolSparkline)
+                {
+                    <div class="dis-sparkline__bar" style="height: @(v)%"></div>
+                }
+            </div>
+        </div>
+
+        <div class="dis-kv-row">
+            <span class="dis-kv__label">STRENGTH:</span>
+            <span class="dis-kv__value dis-kv__value--strong">@State.Strength</span>
+            <div class="dis-sparkline dis-sparkline--dim">
+                @foreach (var v in State.StrengthSparkline)
+                {
+                    <div class="dis-sparkline__bar" style="height: @(v)%"></div>
+                }
+            </div>
+        </div>
+
+        <div class="dis-kv-row dis-kv-row--footer">
+            <span class="dis-kv__label">LAST LOG:</span>
+            <span class="dis-kv__value">@State.LastLogTime</span>
+            <div class="dis-barset">
+                @for (int i = 0; i < 8; i++)
+                {
+                    <div class="dis-barset__bar @(i < State.LogBarsFilled ? "dis-barset__bar--lit" : "")"></div>
+                }
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired] public DashboardState State { get; set; } = default!;
+}
