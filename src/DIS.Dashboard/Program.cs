@@ -44,7 +44,7 @@ builder.Services.AddSingleton<IDashboardStateService, DashboardStateService>();
 // ── SignalR hub client ────────────────────────────────────────────────────────
 builder.Services.AddSingleton<DashboardHubClient>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<DashboardHubClient>());
-
+builder.Services.AddHostedService<DashboardStateUpdater>();
 // ─────────────────────────────────────────────────────────────────────────────
 var app = builder.Build();
 
