@@ -6,11 +6,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DIS.Logger</RootNamespace>
     <AssemblyName>DIS.Logger</AssemblyName>
-    <Description>Event-driven structured logging. Writes all DIS events to SQLite and publishes live via ISignalRPublisher.</Description>
+    <Description>Event-driven structured logging and OHLC bar persistence. Writes all DIS events and market data bars to PostgreSQL. Publishes live events via ISignalRPublisher.</Description>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="9.0.0" />
+    <PackageReference Include="Npgsql" Version="8.0.3" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0" />
     <PackageReference Include="System.Text.Json" Version="9.0.0" />
   </ItemGroup>

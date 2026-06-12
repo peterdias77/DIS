@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>DIS.Dashboard</RootNamespace>
     <AssemblyName>DIS.Dashboard</AssemblyName>
-    <Description>Blazor Server dashboard. Read-only UI for DIS. Loads history from SQLite on startup, receives live events via SignalR from DIS.Engine.</Description>
+    <Description>Blazor Server dashboard. Read-only UI for DIS. Loads history from PostgreSQL on startup, receives live events via SignalR from DIS.Engine.</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,6 +1,6 @@
 using DIS.Core.Interfaces;
 using DIS.Dashboard.Services;
-using DIS.Logger.Sqlite;
+using DIS.Logger.Postgres;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -10,7 +10,10 @@ using Radzen;
 // DIS Dashboard — Blazor Server entry point
 // Runs on http://localhost:5200
 // Connects to DIS.Engine SignalR hub at http://localhost:5100/dis-hub
-// Reads history from the same SQLite DB written by DIS.Engine
+// Reads history from the same PostgreSQL instance written by DIS.Engine
+//
+// Required environment variables:
+//   DIS_PG_CONN   PostgreSQL connection string (mandatory, same as DIS.Engine)
 // ─────────────────────────────────────────────────────────────────────────────
 
 var builder = WebApplication.CreateBuilder(args);
@@ -21,30 +24,32 @@ builder.WebHost.UseUrls("http://localhost:5200");
 builder.Services.AddRazorComponents()
        .AddInteractiveServerComponents();
 
-// ── SQLite log reader ─────────────────────────────────────────────────────────
-// Reads from the same dis_logs.db written by DIS.Engine.
-// Set DIS_DB_PATH environment variable to point at the correct file location.
-var dbPath = Environment.GetEnvironmentVariable("DIS_DB_PATH")
-    ?? Path.Combine(AppContext.BaseDirectory, "dis_logs.db");
+// ── PostgreSQL connection string ──────────────────────────────────────────────
+var pgConn = Environment.GetEnvironmentVariable("DIS_PG_CONN")
+    ?? throw new InvalidOperationException(
+        "DIS_PG_CONN environment variable is not set. " +
+        "Example: Host=localhost;Port=5432;Database=dis;Username=dis;Password=secret");
 
-builder.Services.AddSingleton<SqliteLogWriter>(_ =>
+// ── PostgreSQL log reader ─────────────────────────────────────────────────────
+// Read-only connection to the same DB written by DIS.Engine.
+// PostgresLogWriter implements ILogReader — Dashboard only calls the read methods.
+builder.Services.AddSingleton<PostgresLogWriter>(_ =>
 {
-    var writer = new SqliteLogWriter(dbPath);
+    var writer = new PostgresLogWriter(pgConn);
+    // InitialiseAsync is idempotent — safe to call from Dashboard too.
+    // Ensures tables exist if Dashboard starts before Engine (dev convenience).
     writer.InitialiseAsync().GetAwaiter().GetResult();
     return writer;
 });
-
-// Register both as ILogReader (for Razor page injection) and as SqliteLogWriter
-builder.Services.AddSingleton<ILogReader>(sp => sp.GetRequiredService<SqliteLogWriter>());
+builder.Services.AddSingleton<ILogReader>(sp => sp.GetRequiredService<PostgresLogWriter>());
 
 // ── Dashboard services ────────────────────────────────────────────────────────
 builder.Services.AddSingleton<LogReaderService>();
+builder.Services.AddSingleton<IDashboardStateService, DashboardStateService>();
 
 // ── SignalR hub client ────────────────────────────────────────────────────────
 builder.Services.AddSingleton<DashboardHubClient>();
 builder.Services.AddHostedService(sp => sp.GetRequiredService<DashboardHubClient>());
-
-builder.Services.AddSingleton<IDashboardStateService, DashboardStateService>();
 
 // ─────────────────────────────────────────────────────────────────────────────
 var app = builder.Build();

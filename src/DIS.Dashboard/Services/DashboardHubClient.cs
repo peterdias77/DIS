@@ -9,8 +9,9 @@ namespace DIS.Dashboard.Services;
 /// Background service that maintains a SignalR connection to DIS.Engine
 /// at http://localhost:5100/dis-hub.
 ///
-/// Receives "ReceiveLogEntry" events and raises OnLogEntry for
-/// Blazor components to subscribe to and re-render.
+/// Receives two event types:
+///   "ReceiveLogEntry"  → raises OnLogEntry  (state/output/trade events)
+///   "ReceiveFeedHealth" → raises OnFeedHealth (bar ingestion status, every 5s)
 ///
 /// Implements automatic reconnect with exponential backoff.
 /// </summary>
@@ -19,10 +20,12 @@ public sealed class DashboardHubClient : BackgroundService
     private readonly ILogger<DashboardHubClient> _log;
     private HubConnection? _connection;
 
-    /// <summary>Raised on the thread pool whenever a new DISLogEntry arrives from the Engine.</summary>
-    public event Action<DISLogEntry>? OnLogEntry;
+    /// <summary>Raised on the thread pool whenever a new DISLogEntry arrives.</summary>
+    public event Action<DISLogEntry>?       OnLogEntry;
 
-    /// <summary>Current connection state — readable by Blazor components.</summary>
+    /// <summary>Raised every 5 seconds with the latest FeedHealthSnapshot.</summary>
+    public event Action<FeedHealthSnapshot>? OnFeedHealth;
+
     public HubConnectionState ConnectionState =>
         _connection?.State ?? HubConnectionState.Disconnected;
 
@@ -33,20 +36,26 @@ public sealed class DashboardHubClient : BackgroundService
         try
         {
             _connection = new HubConnectionBuilder()
-           .WithUrl("http://localhost:5100/dis-hub")
-           .WithAutomaticReconnect(new[]
-           {
-                TimeSpan.FromSeconds(2),
-                TimeSpan.FromSeconds(5),
-                TimeSpan.FromSeconds(10),
-                TimeSpan.FromSeconds(30)
-           })
-           .Build();
+                .WithUrl("http://localhost:5100/dis-hub")
+                .WithAutomaticReconnect(new[]
+                {
+                    TimeSpan.FromSeconds(2),
+                    TimeSpan.FromSeconds(5),
+                    TimeSpan.FromSeconds(10),
+                    TimeSpan.FromSeconds(30)
+                })
+                .Build();
 
-            // Wire the incoming event
+            // ── Event: log entry (state, output, trade events) ────────────────
             _connection.On<DISLogEntry>("ReceiveLogEntry", entry =>
             {
                 OnLogEntry?.Invoke(entry);
+            });
+
+            // ── Event: feed health snapshot (bar ingestion status) ─────────────
+            _connection.On<FeedHealthSnapshot>("ReceiveFeedHealth", snapshot =>
+            {
+                OnFeedHealth?.Invoke(snapshot);
             });
 
             _connection.Reconnecting += error =>
@@ -77,14 +86,13 @@ public sealed class DashboardHubClient : BackgroundService
                 }
             }
 
-            // Keep alive until shutdown
             await Task.Delay(Timeout.Infinite, stoppingToken);
         }
+        catch (OperationCanceledException) { /* shutdown */ }
         catch (Exception ex)
         {
             _log.LogError(ex, "Error in DashboardHubClient execution.");
-            return;
-        }       
+        }
     }
 
     public override async Task StopAsync(CancellationToken ct)

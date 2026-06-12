@@ -1,7 +1,7 @@
 using System.Text.Json;
 using DIS.Core.Interfaces;
 using DIS.Core.Models;
-using DIS.Logger.Sqlite;
+using DIS.Logger.Postgres;
 using Microsoft.Extensions.Logging;
 
 namespace DIS.Logger;
@@ -10,14 +10,15 @@ namespace DIS.Logger;
 /// Event-driven structured logger.
 /// Every call:
 ///   1. Serialises the event to JSON
-///   2. Writes to SQLite via SqliteLogWriter
+///   2. Writes to PostgreSQL via PostgresLogWriter
 ///   3. Publishes to connected Dashboard clients via ISignalRPublisher
 ///
 /// Only logs when values actually change — no-op if previous == current.
+/// Fire-and-forget via Task.Run so the trading loop is never blocked.
 /// </summary>
 public sealed class DisLogger : IDISLogger
 {
-    private readonly SqliteLogWriter    _db;
+    private readonly PostgresLogWriter  _db;
     private readonly ISignalRPublisher  _publisher;
     private readonly ILogger<DisLogger> _inner;
 
@@ -28,7 +29,7 @@ public sealed class DisLogger : IDISLogger
     };
 
     public DisLogger(
-        SqliteLogWriter    db,
+        PostgresLogWriter  db,
         ISignalRPublisher  publisher,
         ILogger<DisLogger> inner)
     {
@@ -46,14 +47,9 @@ public sealed class DisLogger : IDISLogger
     {
         if (EqualityComparer<TState>.Default.Equals(previous, current)) return;
 
-        var payload = new
-        {
-            state    = stateName,
-            from     = previous.ToString(),
-            to       = current.ToString()
-        };
-
-        Fire("state_change", asset, cycleId, payload, "INFO");
+        Fire("state_change", asset, cycleId,
+            new { state = stateName, from = previous.ToString(), to = current.ToString() },
+            "INFO");
     }
 
     // ── Output change ────────────────────────────────────────────────────────
@@ -65,14 +61,9 @@ public sealed class DisLogger : IDISLogger
     {
         if (EqualityComparer<TOutput>.Default.Equals(previous, current)) return;
 
-        var payload = new
-        {
-            output   = outputName,
-            from     = previous.ToString(),
-            to       = current.ToString()
-        };
-
-        Fire("output_change", asset, cycleId, payload, "INFO");
+        Fire("output_change", asset, cycleId,
+            new { output = outputName, from = previous.ToString(), to = current.ToString() },
+            "INFO");
     }
 
     // ── Orchestration change ─────────────────────────────────────────────────
@@ -82,101 +73,75 @@ public sealed class DisLogger : IDISLogger
         OrchestrationDecision previous,
         OrchestrationDecision current)
     {
-        var payload = new
+        Fire("orchestration_change", asset, cycleId, new
         {
             portfolio_permission = Change(previous.PortfolioPermission, current.PortfolioPermission),
             market_permission    = Change(previous.MarketPermission,    current.MarketPermission),
             strategy             = Change(previous.Strategy,            current.Strategy),
             direction            = Change(previous.Direction,           current.Direction),
             confidence           = Change(previous.Confidence,          current.Confidence)
-        };
-
-        Fire("orchestration_change", asset, cycleId, payload, "INFO");
+        }, "INFO");
     }
 
     // ── Entry ────────────────────────────────────────────────────────────────
 
-    public void LogEntry(string asset, int cycleId, EntryEvent e)
-    {
-        var payload = new
-        {
-            signal = e.Signal.ToString(),
-            price  = e.Price,
-            reason = e.Reason
-        };
-
-        Fire("entry", asset, cycleId, payload, "INFO");
-    }
+    public void LogEntry(string asset, int cycleId, EntryEvent e) =>
+        Fire("entry", asset, cycleId,
+            new { signal = e.Signal.ToString(), price = e.Price, reason = e.Reason },
+            "INFO");
 
     // ── Trade control ────────────────────────────────────────────────────────
 
-    public void LogTradeControl(string asset, int cycleId, TradeControlEvent e)
-    {
-        var payload = new
+    public void LogTradeControl(string asset, int cycleId, TradeControlEvent e) =>
+        Fire("trade_control", asset, cycleId, new
         {
-            active_ranks        = e.ActiveRanks,
-            next_rank           = e.NextRank,
-            trading_permission  = e.TradingPermission.ToString(),
-            market_permission   = e.MarketPermission.ToString()
-        };
-
-        Fire("trade_control", asset, cycleId, payload, "INFO");
-    }
+            active_ranks       = e.ActiveRanks,
+            next_rank          = e.NextRank,
+            trading_permission = e.TradingPermission.ToString(),
+            market_permission  = e.MarketPermission.ToString()
+        }, "INFO");
 
     // ── Risk ─────────────────────────────────────────────────────────────────
 
-    public void LogRisk(string asset, int cycleId, RiskEvent e)
-    {
-        var payload = new
+    public void LogRisk(string asset, int cycleId, RiskEvent e) =>
+        Fire("risk", asset, cycleId, new
         {
             entry_size    = e.Size.ToString(),
             risk_percent  = e.RiskPercent,
             stop_loss     = e.StopLossPrice,
             sl_distance   = e.SlDistance,
             position_size = e.PositionSize
-        };
-
-        Fire("risk", asset, cycleId, payload, "INFO");
-    }
+        }, "INFO");
 
     // ── Execution ────────────────────────────────────────────────────────────
 
-    public void LogExecution(string asset, int cycleId, ExecutionEvent e)
-    {
-        var payload = new
+    public void LogExecution(string asset, int cycleId, ExecutionEvent e) =>
+        Fire("execution", asset, cycleId, new
         {
-            order_type       = e.OrderType.ToString(),
-            execution_price  = e.ExecutionPrice,
-            slippage         = e.Slippage
-        };
-
-        Fire("execution", asset, cycleId, payload, "INFO");
-    }
+            order_type      = e.OrderType.ToString(),
+            execution_price = e.ExecutionPrice,
+            slippage        = e.Slippage
+        }, "INFO");
 
     // ── Exit ─────────────────────────────────────────────────────────────────
 
     public void LogExit(string asset, int cycleId, ExitEvent e)
     {
         var level = e.State == DIS.Core.Enums.PositionState.Closed ? "INFO" : "WARNING";
-
-        var payload = new
+        Fire("exit", asset, cycleId, new
         {
             position_state = e.State.ToString(),
             reason         = e.Reason,
             tp_hit         = e.TpHit,
             exit_price     = e.ExitPrice,
             pnl            = e.Pnl
-        };
-
-        Fire("exit", asset, cycleId, payload, level);
+        }, level);
     }
 
-    // ── Core fire-and-forget pipeline ────────────────────────────────────────
+    // ── Core pipeline ─────────────────────────────────────────────────────────
 
     private void Fire(string eventType, string asset, int cycleId, object payload, string logLevel)
     {
-        // Run DB write + SignalR publish on a background thread
-        // so the trading loop is never blocked
         _ = Task.Run(async () =>
         {
             try
@@ -199,12 +164,12 @@ public sealed class DisLogger : IDISLogger
             }
             catch (Exception ex)
             {
-                _inner.LogError(ex, "DIS Logger pipeline failed for event {EventType} on {Asset}", eventType, asset);
+                _inner.LogError(ex,
+                    "DIS Logger pipeline failed for event {EventType} on {Asset}",
+                    eventType, asset);
             }
         });
     }
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static object Change<T>(T from, T to) =>
         new { from = from!.ToString(), to = to!.ToString() };

@@ -1,0 +1,14 @@
+/* ── Feed Status page ────────────────────────────────────────────────────── */
+/* Append these rules to src/DIS.Dashboard/wwwroot/css/dashboard.css        */
+
+.dis-feed-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+/* Re-uses .dis-card from app.css; add value colour helpers */
+.dis-val--green  { color: var(--green); font-size: 22px; font-weight: 700; }
+.dis-val--red    { color: var(--red);   font-size: 22px; font-weight: 700; }
+.dis-val--yellow { color: var(--yellow);font-size: 22px; font-weight: 700; }
